@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn add:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(copy:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "H:\\"
+    ]
+  }
+}
