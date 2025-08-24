@@ -10,8 +10,6 @@ import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { useBolaoStore } from '@/lib/stores/useBolaoStore'
 import { BoloesListSkeleton } from '@/components/ui/loading-skeletons'
 import { EmptyBoloesList } from '@/components/ui/empty-states'
-import { FadeIn, ScaleOnHover, AnimatedCounter } from '@/components/ui/animations'
-import { ResponsiveGrid, ResponsiveCard, useIsMobile } from '@/components/ui/mobile-optimizations'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 export default function MeusBoloes() {

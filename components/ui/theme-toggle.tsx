@@ -222,7 +222,7 @@ export function ThemePreviewCard({
 
 // Configurações avançadas de tema
 export function ThemeSettings() {
-  const { theme, setTheme, themes } = useTheme()
+  const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {

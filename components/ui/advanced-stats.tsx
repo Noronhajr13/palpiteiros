@@ -1,7 +1,6 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import {
   BarChart,
@@ -66,7 +65,7 @@ interface AdvancedStatsProps {
   className?: string
 }
 
-export function AdvancedStats({ userId, bolaoId, data, className = '' }: AdvancedStatsProps) {
+export function AdvancedStats({ data, className = '' }: AdvancedStatsProps) {
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
@@ -361,7 +360,7 @@ function MonthlyTrendChart({ data }: { data: StatsData['performanceMensal'] }) {
 }
 
 // Panel de insights
-function InsightsPanel({ data }: { data: StatsData }) {
+function InsightsPanel({ }: { data: StatsData }) {
   const insights = [
     {
       type: 'positive',
@@ -430,7 +429,7 @@ function InsightsPanel({ data }: { data: StatsData }) {
 }
 
 // Hook para gerar dados mock de estatísticas
-export function useStatsData(userId: string, bolaoId?: string): StatsData {
+export function useStatsData(): StatsData {
   // Em produção, isso viria de uma API
   return {
     pontosPorRodada: [

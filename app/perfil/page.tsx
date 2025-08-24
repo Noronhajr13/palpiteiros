@@ -26,7 +26,7 @@ import {
 } from "lucide-react"
 import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { ThemeToggle, ThemeSettings } from '@/components/ui/theme-toggle'
-import { ActionBreadcrumbs, BreadcrumbCard } from '@/components/ui/breadcrumbs'
+import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
 import { toast } from "sonner"
 
 interface UserProfile {
@@ -74,7 +74,7 @@ export default function PerfilPage() {
   const { user, isAuthenticated } = useAuthStore()
   const [loading, setLoading] = useState(true)
   const [editMode, setEditMode] = useState(false)
-  const [activeTab, setActiveTab] = useState<'geral' | 'notificacoes' | 'privacidade' | 'tema'>('geral')
+  // const [activeTab, setActiveTab] = useState<'geral' | 'notificacoes' | 'privacidade' | 'tema'>('geral')
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [formData, setFormData] = useState({
     name: '',

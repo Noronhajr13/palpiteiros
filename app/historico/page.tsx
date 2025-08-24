@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { 
   ArrowLeft,
   Calendar,
-  Trophy,
   Target,
   CheckCircle,
   XCircle,
@@ -19,13 +18,11 @@ import {
   Search,
   Download,
   Eye,
-  Award,
-  TrendingUp,
   Hash
 } from "lucide-react"
 import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { ActionBreadcrumbs, BreadcrumbCard } from '@/components/ui/breadcrumbs'
+import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
 
 interface HistoricoItem {
   id: string

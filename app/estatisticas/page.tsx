@@ -8,7 +8,7 @@ import { ArrowLeft, Download, Share, Calendar, Filter } from "lucide-react"
 import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { AdvancedStats, useStatsData } from '@/components/ui/advanced-stats'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { ActionBreadcrumbs, BreadcrumbCard } from '@/components/ui/breadcrumbs'
+import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
 
 export default function EstatisticasPage() {
   const router = useRouter()
@@ -17,7 +17,7 @@ export default function EstatisticasPage() {
   const [timeRange, setTimeRange] = useState<'all' | 'month' | 'quarter'>('all')
 
   // Dados de estatísticas (mock)
-  const statsData = useStatsData(user?.id || '')
+  const statsData = useStatsData()
 
   useEffect(() => {
     if (!isAuthenticated) {
