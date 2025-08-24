@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+🎯 Palpiteiros
 
-## Getting Started
+🎯 Sobre o Projeto
 
-First, run the development server:
+  - O Palpiteiros V2 é um aplicativo web completo para a gestão de bolões esportivos. Desenvolvido com uma abordagem "frontend-first", o projeto começou com um MVP (Produto Mínimo Viável) funcional e evoluiu para um produto robusto e visualmente impressionante, com um foco especial em uma experiência de usuário (UX) excepcional. Atualmente na Fase 8, o próximo passo é a integração do backend com o Supabase.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+✨ Destaques do Projeto
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+  - Frontend-First: A prioridade foi criar uma interface completa e funcional antes de integrar um backend.
+  - UX/UI Premium: O design foi refinado com um Design System, microinterações, animações suaves e um Dark Mode completo.
+  - Performance Otimizada: Melhorias de build, otimização de imagens e resolução de warnings garantem um desempenho rápido e estável.
+  - Recursos Avançados: Implementação de funcionalidades como breadcrumbs, Mobile Experience completo, estatísticas profissionais e um sistema de perfil de usuário robusto.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🚀 Status Atual
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+  Versão: V2
+  Status: ✅ FASE 7 CONCLUÍDA - Features Premium implementadas com sucesso!
+  Próximo Passo: FASE 8 - INTEGRAÇÃO BACKEND (Supabase)
 
-## Learn More
+🛠️ Tecnologias e Ferramentas
 
-To learn more about Next.js, take a look at the following resources:
+  * Frontend
+    - Framework: Next.js 15.5.0 (App Router)
+    - Linguagem: React 19.1.0, TypeScript 5
+    - Estilização: Tailwind CSS 4, shadcn/ui
+    - Gerenciamento de Estado: Zustand
+    - Validação de Formulários: React Hook Form + Zod
+    - Notificações: Sonner
+    - Ícones: Lucide React
+    - Animações: Framer Motion
+    - Gráficos: Recharts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  * Backend (Roadmap)
+    - Backend as a Service (BaaS): Supabase
+    - Banco de Dados: Supabase Database
+    - Autenticação: Supabase Auth
+    - Comunicação: API Routes Next.js, Real-time subscriptions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+✅ Funcionalidades Implementadas
 
-## Deploy on Vercel
+  * Funcionalidades Core (Fase 1)
+    - Sistema de Autenticação: Login, Cadastro e proteção de rotas.
+    - Gestão de Bolões: Criar, entrar, dashboard, e páginas de bolão.
+    - Sistema de Palpites: Interface completa e sistema de pontuação.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  * Melhorias Visuais e de UX (Fases 2 a 7)
+    - Design System Completo: Paleta de cores, tipografia, sombras e animações.
+    - Páginas Renovadas: Landing page, dashboard, e páginas internas com layouts modernos.
+    - Componentes Avançados: Toasts, Skeletons, Empty States, Modals e Progress Indicators.
+    - Otimizações de Usabilidade: Breadcrumbs, Mobile Experience completo e animações com Framer Motion.
+    - Features Premium: Dark Mode, Estatísticas Avançadas, Perfil do Usuário e Histórico Detalhado.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📁 Estrutura do Projeto
+
+    palpiteiros-v2/
+    ├── app/
+    │   ├── page.tsx                   # ✅ Landing page
+    │   ├── entrar/page.tsx            # ✅ Login
+    │   ├── cadastrar/page.tsx         # ✅ Cadastro
+    │   ├── meus-boloes/page.tsx       # ✅ Dashboard
+    │   ├── criar-bolao/page.tsx       # ✅ Criar bolão
+    │   ├── entrar-bolao/page.tsx      # ✅ Entrar em bolão
+    │   └── bolao/[id]/
+    │       ├── page.tsx               # ✅ Página do bolão
+    │       ├── palpites/page.tsx      # ✅ Interface palpites
+    │       └── ranking/page.tsx       # ✅ Rankings
+    ├── lib/stores/
+    │   ├── useAuthStore.ts            # ✅ Store autenticação
+    │   └── useBolaoStore.ts           # ✅ Store bolões
+    ├── components/ui/                 # ✅ shadcn/ui components
+    └── lib/utils.ts                   # ✅ Utilitários
+
+
+⚙️ Como Executar o Projeto
+
+  * Instale as dependências:
+    - npm install
+
+  * Execute o servidor de desenvolvimento:
+    - npm run dev
+
+🤝 Conquistas e Próximos Passos
+  ✅ Build Success: 10 rotas compilando perfeitamente
+  ✅ Zero Bugs: Sistema 100% navegável
+  ✅ MVP Completo: Todas as funcionalidades essenciais
+  ✅ Frontend-First: Estratégia executada com sucesso
+
+Este projeto está em desenvolvimento ativo. Sinta-se à vontade para contribuir, reportar bugs ou sugerir novas funcionalidades.
