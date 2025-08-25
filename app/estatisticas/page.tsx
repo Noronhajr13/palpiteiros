@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Download, Share, Calendar, Filter } from "lucide-react"
 import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { AdvancedStats, useStatsData } from '@/components/ui/advanced-stats'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
 
 export default function EstatisticasPage() {
@@ -95,13 +94,11 @@ export default function EstatisticasPage() {
             </div>
             
             <div className="flex items-center gap-3">
-              <ThemeToggle />
-              
               {/* Filtro de tempo */}
               <select 
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value as 'all' | 'month' | 'quarter')}
-                className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-700 text-gray-100"
               >
                 <option value="all">Todo período</option>
                 <option value="month">Último mês</option>

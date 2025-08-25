@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Trophy, Eye, EyeOff, Loader2, User, Mail, Lock } from "lucide-react"
+import { Trophy, Eye, EyeOff, Loader2, User, Mail, Lock, UserPlus, ArrowLeft } from "lucide-react"
 import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { toast } from "sonner"
+import { FadeIn, ScaleOnHover } from "@/components/ui/animations"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -102,179 +103,222 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Trophy className="h-8 w-8 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Palpiteiros</h1>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Crie sua conta</h2>
-          <p className="text-gray-600 mt-2">Junte-se aos milhares de palpiteiros!</p>
-        </div>
-
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>Cadastrar</CardTitle>
-            <CardDescription>
-              Preencha os dados abaixo para criar sua conta
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome completo</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="Seu nome completo"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                    className="pl-9"
-                  />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-green-600/5"></div>
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500"></div>
+      
+      <div className="w-full max-w-md relative z-10">
+        {/* Header Premium */}
+        <FadeIn direction="down">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-75"></div>
+                <div className="relative w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Trophy className="h-7 w-7 text-white" />
                 </div>
-                {errors.name && (
-                  <p className="text-sm text-red-600">{errors.name}</p>
-                )}
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                    className="pl-9"
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Mínimo 6 caracteres"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                    className="pl-9 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    disabled={loading}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-sm text-red-600">{errors.password}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar senha</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Digite a senha novamente"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                    className="pl-9 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    disabled={loading}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                {errors.confirmPassword && (
-                  <p className="text-sm text-red-600">{errors.confirmPassword}</p>
-                )}
-              </div>
-
-              {errors.general && (
-                <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                  {errors.general}
-                </div>
-              )}
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Criando conta...
-                  </>
-                ) : (
-                  'Criar Conta'
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Já tem uma conta?{' '}
-                <Link 
-                  href="/entrar" 
-                  className="font-medium text-blue-600 hover:text-blue-500"
-                >
-                  Faça login aqui
-                </Link>
-              </p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
+                Palpiteiros
+              </h1>
             </div>
-          </CardContent>
-        </Card>
+            <h2 className="text-2xl font-bold text-white mb-2">Crie sua conta 🚀</h2>
+            <p className="text-gray-300">Junte-se aos milhares de palpiteiros!</p>
+          </div>
+        </FadeIn>
 
-        <div className="mt-6 text-center">
-          <Link 
-            href="/" 
-            className="text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← Voltar para a página inicial
-          </Link>
-        </div>
+        <FadeIn delay={0.1}>
+          <ScaleOnHover scale={1.02}>
+            <Card className="shadow-2xl bg-gray-800/30 backdrop-blur-sm border-gray-700/50 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-white text-xl flex items-center gap-2">
+                  <UserPlus className="h-5 w-5 text-green-400" />
+                  Cadastrar
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  Preencha os dados abaixo para criar sua conta
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="relative z-10">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-gray-200 font-medium">Nome completo</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Seu nome completo"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        disabled={loading}
+                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-green-500/20 transition-all duration-300 pl-10"
+                      />
+                    </div>
+                    {errors.name && (
+                      <FadeIn>
+                        <p className="text-sm text-red-300">{errors.name}</p>
+                      </FadeIn>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-200 font-medium">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        disabled={loading}
+                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 pl-10"
+                      />
+                    </div>
+                    {errors.email && (
+                      <FadeIn>
+                        <p className="text-sm text-red-300">{errors.email}</p>
+                      </FadeIn>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-gray-200 font-medium">Senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Mínimo 6 caracteres"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                        disabled={loading}
+                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 transition-all duration-300 pl-10 pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-400 transition-colors duration-300"
+                        disabled={loading}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <FadeIn>
+                        <p className="text-sm text-red-300">{errors.password}</p>
+                      </FadeIn>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-gray-200 font-medium">Confirmar senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Digite a senha novamente"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        required
+                        disabled={loading}
+                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-green-500/20 transition-all duration-300 pl-10 pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-400 transition-colors duration-300"
+                        disabled={loading}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <FadeIn>
+                        <p className="text-sm text-red-300">{errors.confirmPassword}</p>
+                      </FadeIn>
+                    )}
+                  </div>
+
+                  {errors.general && (
+                    <FadeIn>
+                      <div className="text-sm text-red-300 bg-red-900/30 border border-red-700/50 p-4 rounded-lg backdrop-blur-sm">
+                        {errors.general}
+                      </div>
+                    </FadeIn>
+                  )}
+
+                  <ScaleOnHover scale={1.02}>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300" 
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Criando conta...
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="mr-2 h-5 w-5" />
+                          Criar Conta
+                        </>
+                      )}
+                    </Button>
+                  </ScaleOnHover>
+                </form>
+
+                <div className="mt-8 text-center">
+                  <p className="text-gray-300">
+                    Já tem uma conta?{' '}
+                    <Link 
+                      href="/entrar" 
+                      className="font-semibold text-blue-400 hover:text-blue-300 transition-colors duration-300"
+                    >
+                      Faça login aqui
+                    </Link>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </ScaleOnHover>
+        </FadeIn>
+
+        <FadeIn delay={0.2}>
+          <div className="mt-6 text-center">
+            <ScaleOnHover scale={1.05}>
+              <Link 
+                href="/" 
+                className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar para a página inicial
+              </Link>
+            </ScaleOnHover>
+          </div>
+        </FadeIn>
       </div>
     </div>
   )

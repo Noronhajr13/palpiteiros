@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* Design Dark Elegante - Tema Fixo */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Cores base dark */
+    --background: 217 33% 7%;     /* Gray-950 mais azulado */
+    --foreground: 213 31% 91%;    /* Gray-100 mais azulado */
+    
+    /* Cards e superfícies */
+    --card: 215 28% 10%;          /* Slightly lighter than bg */
+    --card-foreground: 213 31% 91%;
+    
+    /* Cores primárias (blue elegante) */
+    --primary: 217 91% 60%;       /* Blue-500 */
+    --primary-foreground: 217 33% 7%;
+    
+    /* Cores secundárias (purple elegante) */
+    --secondary: 262 83% 58%;     /* Purple-500 */
+    --secondary-foreground: 213 31% 91%;
+    
+    /* Muted (para textos secundários) */
+    --muted: 215 25% 15%;         /* Darker gray */
+    --muted-foreground: 217 10% 64%; /* Gray-400 */
+    
+    /* Accent (verde para sucessos) */
+    --accent: 142 76% 36%;        /* Green-600 */
+    --accent-foreground: 213 31% 91%;
+    
+    /* Destrutivos (vermelho) */
+    --destructive: 0 75% 60%;     /* Red-500 */
+    --destructive-foreground: 213 31% 91%;
+    
+    /* Bordas e inputs */
+    --border: 215 20% 20%;        /* Gray-800 */
+    --input: 215 20% 20%;
+    --ring: 217 91% 60%;          /* Same as primary */
+    
+    /* Border radius */
+    --radius: 0.75rem;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  
+  * {
+    border-color: hsl(var(--border));
+  }
+  
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Scrollbar dark */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
 }
