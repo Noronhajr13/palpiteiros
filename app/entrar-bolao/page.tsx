@@ -87,9 +87,9 @@ export default function EntrarBolaoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-card/80 backdrop-blur-sm shadow-sm border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" asChild>
@@ -99,10 +99,10 @@ export default function EntrarBolaoPage() {
               </Link>
             </Button>
             <div className="flex items-center gap-3">
-              <Users className="h-6 w-6 text-blue-600" />
+              <Users className="h-6 w-6 text-primary" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Entrar em Bolão</h1>
-                <p className="text-sm text-gray-600">Use um código para participar</p>
+                <h1 className="text-xl font-bold text-foreground">Entrar em Bolão</h1>
+                <p className="text-sm text-muted-foreground">Use um código para participar</p>
               </div>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function EntrarBolaoPage() {
       </header>
 
       {/* Breadcrumbs */}
-      <div className="bg-gradient-to-r from-gray-50 to-blue-50/30 border-b">
+      <div className="bg-muted/30 border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <BreadcrumbCard>
             <ActionBreadcrumbs action="entrar-bolao" />
@@ -126,14 +126,14 @@ export default function EntrarBolaoPage() {
               <CardTitle className="text-center">Como entrar em um bolão?</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mx-auto">
-                <Hash className="h-8 w-8 text-blue-600" />
+              <div className="flex items-center justify-center w-16 h-16 bg-primary/20 rounded-full mx-auto">
+                <Hash className="h-8 w-8 text-primary" />
               </div>
               <div className="space-y-2">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Peça o <strong>código do bolão</strong> para o administrador
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   O código tem <strong>6-8 caracteres</strong> (ex: ABC123, FAM2024)
                 </p>
               </div>
@@ -153,7 +153,7 @@ export default function EntrarBolaoPage() {
                 <div className="space-y-2">
                   <Label htmlFor="codigo">Código do Bolão</Label>
                   <div className="relative">
-                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="codigo"
                       name="codigo"
@@ -163,33 +163,33 @@ export default function EntrarBolaoPage() {
                       onChange={handleChange}
                       required
                       disabled={loading}
-                      className="pl-9 text-center text-lg font-mono tracking-wider"
+                      className="pl-9 text-center text-lg font-mono tracking-wider bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
                       maxLength={8}
                       autoComplete="off"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 text-center">
+                  <p className="text-xs text-muted-foreground text-center">
                     {formData.codigo.length}/8 caracteres
                   </p>
                 </div>
 
                 {/* Mensagens */}
                 {error && (
-                  <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                  <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
                     <AlertCircle className="h-4 w-4" />
                     {error}
                   </div>
                 )}
 
                 {success && (
-                  <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md text-center">
+                  <div className="text-sm text-accent bg-accent/10 p-3 rounded-md text-center border border-accent/20">
                     ✅ {success}
                   </div>
                 )}
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full gradient-primary text-white font-semibold"
                   disabled={loading || formData.codigo.length < 3}
                 >
                   {loading ? (
@@ -216,21 +216,21 @@ export default function EntrarBolaoPage() {
             <CardContent>
               <div className="space-y-2 text-sm">
                 <p><strong>Códigos disponíveis para teste:</strong></p>
-                <div className="bg-gray-50 p-3 rounded-md font-mono text-center space-y-1">
+                <div className="bg-muted/50 p-3 rounded-md font-mono text-center space-y-1">
                   <div 
-                    className="cursor-pointer hover:bg-blue-50 p-1 rounded"
+                    className="cursor-pointer hover:bg-accent/20 p-1 rounded text-foreground"
                     onClick={() => setFormData({ codigo: 'FAM2024' })}
                   >
                     <code>FAM2024</code> - Brasileirão 2024 - Família
                   </div>
                   <div 
-                    className="cursor-pointer hover:bg-blue-50 p-1 rounded"
+                    className="cursor-pointer hover:bg-accent/20 p-1 rounded text-foreground"
                     onClick={() => setFormData({ codigo: 'COPA24' })}
                   >
                     <code>COPA24</code> - Copa América 2024
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 text-center">
+                <p className="text-xs text-muted-foreground text-center">
                   Clique em um código para usar
                 </p>
               </div>
@@ -243,10 +243,10 @@ export default function EntrarBolaoPage() {
               <CardTitle className="text-sm">Não tem um código?</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Crie seu próprio bolão e convide seus amigos!
               </p>
-              <Button variant="outline" asChild className="w-full">
+              <Button variant="outline" asChild className="w-full border-border text-muted-foreground hover:bg-accent/20 hover:border-accent">
                 <Link href="/criar-bolao">
                   <Trophy className="mr-2 h-4 w-4" />
                   Criar Meu Bolão

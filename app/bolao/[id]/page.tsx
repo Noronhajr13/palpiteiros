@@ -98,12 +98,12 @@ export default function BolaoPage({ params }: BolaoPageProps) {
 
   if (!bolaoAtual) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="text-center p-8">
           <CardContent>
-            <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Bolão não encontrado</h2>
-            <p className="text-gray-600 mb-4">O bolão que você está procurando não existe ou foi removido.</p>
+            <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-foreground mb-2">Bolão não encontrado</h2>
+            <p className="text-muted-foreground mb-4">O bolão que você está procurando não existe ou foi removido.</p>
             <Button asChild>
               <Link href="/meus-boloes">Voltar aos Meus Bolões</Link>
             </Button>
@@ -122,32 +122,32 @@ export default function BolaoPage({ params }: BolaoPageProps) {
     .length
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md shadow-lg border-b border-blue-100">
+      <header className="bg-card/90 backdrop-blur-md shadow-lg border-b border-border">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild className="hover:bg-blue-50 transition-colors">
+              <Button variant="ghost" size="sm" asChild className="hover:bg-accent/20 transition-colors">
                 <Link href="/meus-boloes">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Voltar
                 </Link>
               </Button>
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                <div className="p-3 gradient-primary rounded-xl shadow-lg">
                   <Trophy className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold gradient-text">
                     {bolaoAtual.nome}
                   </h1>
-                  <p className="text-sm text-gray-600 font-medium mt-1">{bolaoAtual.descricao}</p>
+                  <p className="text-sm text-muted-foreground font-medium mt-1">{bolaoAtual.descricao}</p>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-right bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200">
+              <div className="text-right bg-card/80 p-4 rounded-xl border border-border">
                 <div className="text-lg font-bold text-blue-600">#{bolaoAtual.codigo}</div>
                 <div className="text-xs text-gray-600 font-medium">
                   {bolaoAtual.participantes.length}/{bolaoAtual.maxParticipantes} participantes
