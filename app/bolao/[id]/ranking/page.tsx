@@ -7,8 +7,8 @@ import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, ArrowLeft, Medal, Target, TrendingUp, Crown, Award, Star } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStore'
-import { useBolaoStore } from '@/lib/stores/useBolaoStore'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
+import { useBolaoStoreDB as useBolaoStore } from '@/lib/stores/useBolaoStoreAPI'
 import { RankingSkeleton } from '@/components/ui/loading-skeletons'
 import { BolaoBreadcrumbs, BreadcrumbCard } from '@/components/ui/breadcrumbs'
 

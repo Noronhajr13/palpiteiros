@@ -18,7 +18,7 @@ import {
   Hash,
   Trophy
 } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStore'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
 import { useHistoricoPalpites } from '@/lib/hooks/useHistoricoPalpites'
 import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
 import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect'

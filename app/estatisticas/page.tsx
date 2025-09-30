@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Download, Share, Calendar, Filter } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStore'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
 import { AdvancedStats, useStatsData } from '@/components/ui/advanced-stats'
 import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
 

@@ -76,12 +76,20 @@ export const calculateAproveitamento = (acertos: number, total: number): number 
 }
 
 // Função para copiar texto para clipboard
-export const copyToClipboard = async (text: string): Promise<boolean> => {
+export function copyToClipboard(text: string): boolean {
   try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
-    // Fallback para navegadores mais antigos
+    // Verificar se estamos no browser
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return false
+    }
+    
+    // Usar API moderna se disponível
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text)
+      return true
+    }
+    
+    // Fallback para método antigo
     const textArea = document.createElement('textarea')
     textArea.value = text
     document.body.appendChild(textArea)
@@ -89,6 +97,9 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
     const success = document.execCommand('copy')
     document.body.removeChild(textArea)
     return success
+  } catch (error) {
+    console.error('Erro ao copiar para clipboard:', error)
+    return false
   }
 }
 

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useUserProfile } from '@/lib/hooks/useUserProfile'
-import { useAuthStore } from '@/lib/stores/useAuthStore'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
 import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect'
 import { FadeIn, ScaleOnHover } from "@/components/ui/animations"
 import { 

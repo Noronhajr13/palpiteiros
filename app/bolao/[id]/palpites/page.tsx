@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Trophy, ArrowLeft, Target, Clock, CheckCircle, Loader2, Save, ChevronLeft, ChevronRight } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStore'
-import { useBolaoStore, Jogo, Palpite } from '@/lib/stores/useBolaoStore'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
+import { useBolaoStoreDB as useBolaoStore, Jogo, Palpite } from '@/lib/stores/useBolaoStoreAPI'
 import { PalpitesSkeleton } from '@/components/ui/loading-skeletons'
 import { EmptyPalpites } from '@/components/ui/empty-states'
 import { PalpitesProgress } from '@/components/ui/progress-indicators'
@@ -97,11 +97,8 @@ export default function PalpitesPage({ params }: PalpitesPageProps) {
     setSalvandoPalpites(prev => new Set(prev).add(jogo.id))
 
     try {
-      const sucesso = await salvarPalpite(
-        jogo.id,
-        parseInt(palpite.placarA),
-        parseInt(palpite.placarB)
-      )
+      // TODO: Implementar API de palpites quando estiver pronta
+      const sucesso = await salvarPalpite()
 
       if (sucesso) {
         setPalpitesSalvos(prev => new Set(prev).add(jogo.id))

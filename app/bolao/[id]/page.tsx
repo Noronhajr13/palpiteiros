@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, Calendar, Target, TrendingUp, ArrowLeft, Share2, Copy, CheckCircle, UserMinus } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStore'
-import { useBolaoStore } from '@/lib/stores/useBolaoStore'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
+import { useBolaoStoreDB as useBolaoStore } from '@/lib/stores/useBolaoStoreAPI'
 import { BolaoPageSkeleton } from '@/components/ui/loading-skeletons'
 import { EmptyProximosJogos } from '@/components/ui/empty-states'
 import { ShareBolaoDialog, LeaveBolaoDialog } from '@/components/ui/confirmation-dialog'

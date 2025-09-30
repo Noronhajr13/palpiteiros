@@ -220,7 +220,11 @@ export function EmptyError() {
       description="Não conseguimos carregar as informações. Tente novamente em alguns instantes."
       action={{
         label: "🔄 Tentar Novamente",
-        onClick: () => window.location.reload()
+        onClick: () => {
+          if (typeof window !== 'undefined') {
+            window.location.reload()
+          }
+        }
       }}
       className="bg-gradient-to-br from-red-50/50 via-white to-pink-50/50 border-2 border-red-100"
     />

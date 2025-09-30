@@ -61,7 +61,7 @@ interface BolaoState {
   criarBolao: (dados: Partial<Bolao> & { configuracoesPontuacao?: { placarExato: number; resultadoCerto: number; golsExatos: number; multiplicadorFinal: number; bonusSequencia: number; permitePalpiteTardio: boolean } }, usuario: { id: string, nome: string, avatar?: string | null }) => Promise<string>
   entrarBolao: (codigo: string, usuario: { id: string, nome: string, avatar?: string | null }) => Promise<boolean>
   selecionarBolao: (id: string) => void
-  salvarPalpite: (jogoId: string, placarA: number, placarB: number, userId: string) => Promise<boolean>
+  salvarPalpite: () => Promise<boolean>
   carregarBoloes: (userId: string) => Promise<void>
   carregarBolao: (id: string) => Promise<void>
 }
@@ -144,12 +144,12 @@ export const useBolaoStoreDB = create<BolaoState>((set, get) => ({
     await get().carregarBolao(id)
   },
 
-  salvarPalpite: async (_jogoId, _placarA, _placarB, _userId) => {
+  salvarPalpite: async () => {
     set({ loading: true })
     
     try {
       // Por enquanto, vamos simular o salvamento
-      // Você pode implementar a API específica depois
+      // TODO: Implementar API de palpites /api/palpites/salvar
       set({ loading: false })
       return true
     } catch (error) {
