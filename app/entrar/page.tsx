@@ -8,24 +8,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Trophy, Eye, EyeOff, Loader2, LogIn, ArrowLeft } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStore'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
 import { toast } from "sonner"
 import { FadeIn, ScaleOnHover } from "@/components/ui/animations"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuthStore()
+  const { login, loading } = useAuthStore()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
     try {
@@ -49,8 +47,6 @@ export default function LoginPage() {
       toast.error('Ops! Algo deu errado', {
         description: 'Tente novamente em alguns instantes'
       })
-    } finally {
-      setLoading(false)
     }
   }
 

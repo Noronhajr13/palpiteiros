@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, Users, TrendingUp, Plus, LogOut, Target, Award, Hash, ChevronRight, BarChart3, User, History, Star, Zap, Crown } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStore'
-import { useDashboardData } from '@/lib/hooks/useDashboardData'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
+import { useDashboardDataAPI } from '@/lib/hooks/useDashboardDataAPI'
 import { BoloesListSkeleton } from '@/components/ui/loading-skeletons'
 import { EmptyBoloesList } from '@/components/ui/empty-states'
 import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect'
@@ -15,7 +15,7 @@ import { FadeIn, ScaleOnHover } from '@/components/ui/animations'
 export default function MeusBoloes() {
   const router = useRouter()
   const { user, logout } = useAuthStore()
-  const { boloes, stats, loading, statsLoading } = useDashboardData()
+    const { boloes, stats, loading, statsLoading } = useDashboardDataAPI()
   
   // Hook de redirecionamento automático
   useAuthRedirect()

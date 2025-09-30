@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// TABELA DE USUÁRIOS
+model User {
+  id       String  @id @default(cuid())
+  name     String
+  email    String  @unique
+  password String
+  avatar   String?
+  
+  // Relacionamentos
+  adminBoloes     Bolao[]       @relation("AdminBolao")
+  participacoes   Participante[]
+  palpites        Palpite[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// TABELA DE BOLÕES
+model Bolao {
+  id               String  @id @default(cuid())
+  nome             String
+  descricao        String
+  codigo           String  @unique
+  adminId          String
+  maxParticipantes Int     @default(20)
+  status           String  @default("ativo") // ativo, finalizado, pausado
+  
+  // Prêmios (JSON)
+  premios          Json?
+  
+  // Configurações de Pontuação
+  placarExato           Int     @default(10)
+  resultadoCerto        Int     @default(5)  
+  golsExatos           Int     @default(2)
+  multiplicadorFinal   Float   @default(1.0)
+  bonusSequencia       Int     @default(0)
+  permitePalpiteTardio Boolean @default(false)
+  
+  // Relacionamentos
+  admin         User           @relation("AdminBolao", fields: [adminId], references: [id])
+  participantes Participante[]
+  jogos         Jogo[]
+  palpites      Palpite[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("boloes")
+}
+
+// TABELA DE PARTICIPANTES (Relação Many-to-Many entre User e Bolao)
+model Participante {
+  id     String @id @default(cuid())
+  userId String
+  bolaoId String
+  
+  // Estatísticas
+  pontos           Int @default(0)
+  posicao          Int @default(1)
+  palpitesCorretos Int @default(0)
+  totalPalpites    Int @default(0)
+  
+  // Relacionamentos
+  user  User  @relation(fields: [userId], references: [id])
+  bolao Bolao @relation(fields: [bolaoId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, bolaoId])
+  @@map("participantes")
+}
+
+// TABELA DE JOGOS
+model Jogo {
+  id      String @id @default(cuid())
+  bolaoId String
+  rodada  Int
+  data    DateTime
+  timeA   String
+  timeB   String
+  placarA Int?
+  placarB Int?
+  status  String @default("agendado") // agendado, em_andamento, finalizado
+  
+  // Relacionamentos
+  bolao    Bolao     @relation(fields: [bolaoId], references: [id])
+  palpites Palpite[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("jogos")
+}
+
+// TABELA DE PALPITES
+model Palpite {
+  id      String @id @default(cuid())
+  jogoId  String
+  userId  String
+  bolaoId String
+  placarA Int
+  placarB Int
+  pontos  Int?
+  
+  // Relacionamentos
+  jogo  Jogo  @relation(fields: [jogoId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+  bolao Bolao @relation(fields: [bolaoId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jogoId, userId])
+  @@map("palpites")
+}

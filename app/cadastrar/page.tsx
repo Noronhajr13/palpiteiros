@@ -8,13 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Trophy, Eye, EyeOff, Loader2, User, Mail, Lock, UserPlus, ArrowLeft } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStore'
+import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
 import { toast } from "sonner"
 import { FadeIn, ScaleOnHover } from "@/components/ui/animations"
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { register } = useAuthStore()
+  const { register, loading } = useAuthStore()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,7 +23,6 @@ export default function RegisterPage() {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validateForm = () => {
@@ -58,8 +57,6 @@ export default function RegisterPage() {
     
     if (!validateForm()) return
 
-    setLoading(true)
-
     try {
       const success = await register(formData.name, formData.email, formData.password)
       
@@ -81,8 +78,6 @@ export default function RegisterPage() {
       toast.error('Erro no cadastro', {
         description: 'Tente novamente em alguns instantes'
       })
-    } finally {
-      setLoading(false)
     }
   }
 
