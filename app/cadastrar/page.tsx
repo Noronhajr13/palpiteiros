@@ -98,42 +98,39 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-green-600/5"></div>
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500"></div>
+      <div className="absolute inset-0 bg-accent/5"></div>
+      <div className="absolute top-0 left-0 w-full h-1 gradient-primary"></div>
       
       <div className="w-full max-w-md relative z-10">
         {/* Header Premium */}
         <FadeIn direction="down">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-75"></div>
-                <div className="relative w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Trophy className="h-7 w-7 text-white" />
-                </div>
+              <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center">
+                <Trophy className="h-7 w-7 text-white" />
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold gradient-text">
                 Palpiteiros
               </h1>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Crie sua conta 🚀</h2>
-            <p className="text-gray-300">Junte-se aos milhares de palpiteiros!</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Crie sua conta 🚀</h2>
+            <p className="text-muted-foreground">Junte-se aos milhares de palpiteiros!</p>
           </div>
         </FadeIn>
 
         <FadeIn delay={0.1}>
           <ScaleOnHover scale={1.02}>
-            <Card className="shadow-2xl bg-gray-800/30 backdrop-blur-sm border-gray-700/50 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <Card className="shadow-2xl bg-card backdrop-blur-sm border-border relative overflow-hidden group">
+              <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               
               <CardHeader className="relative z-10">
-                <CardTitle className="text-white text-xl flex items-center gap-2">
-                  <UserPlus className="h-5 w-5 text-green-400" />
+                <CardTitle className="text-foreground text-xl flex items-center gap-2">
+                  <UserPlus className="h-5 w-5 text-primary" />
                   Cadastrar
                 </CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardDescription className="text-muted-foreground">
                   Preencha os dados abaixo para criar sua conta
                 </CardDescription>
               </CardHeader>
@@ -141,9 +138,9 @@ export default function RegisterPage() {
               <CardContent className="relative z-10">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-gray-200 font-medium">Nome completo</Label>
+                    <Label htmlFor="name" className="text-foreground font-medium">Nome completo</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <Input
                         id="name"
                         name="name"
@@ -153,20 +150,20 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         required
                         disabled={loading}
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-green-500/20 transition-all duration-300 pl-10"
+                        className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 transition-all duration-300 pl-10"
                       />
                     </div>
                     {errors.name && (
                       <FadeIn>
-                        <p className="text-sm text-red-300">{errors.name}</p>
+                        <p className="text-sm text-destructive">{errors.name}</p>
                       </FadeIn>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-200 font-medium">Email</Label>
+                    <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <Input
                         id="email"
                         name="email"
@@ -176,20 +173,20 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         required
                         disabled={loading}
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 pl-10"
+                        className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 transition-all duration-300 pl-10"
                       />
                     </div>
                     {errors.email && (
                       <FadeIn>
-                        <p className="text-sm text-red-300">{errors.email}</p>
+                        <p className="text-sm text-destructive">{errors.email}</p>
                       </FadeIn>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-gray-200 font-medium">Senha</Label>
+                    <Label htmlFor="password" className="text-foreground font-medium">Senha</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <Input
                         id="password"
                         name="password"
@@ -199,12 +196,12 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         required
                         disabled={loading}
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 transition-all duration-300 pl-10 pr-12"
+                        className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 transition-all duration-300 pl-10 pr-12"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-400 transition-colors duration-300"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors duration-300"
                         disabled={loading}
                       >
                         {showPassword ? (
@@ -216,15 +213,15 @@ export default function RegisterPage() {
                     </div>
                     {errors.password && (
                       <FadeIn>
-                        <p className="text-sm text-red-300">{errors.password}</p>
+                        <p className="text-sm text-destructive">{errors.password}</p>
                       </FadeIn>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-gray-200 font-medium">Confirmar senha</Label>
+                    <Label htmlFor="confirmPassword" className="text-foreground font-medium">Confirmar senha</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <Input
                         id="confirmPassword"
                         name="confirmPassword"
@@ -234,12 +231,12 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         required
                         disabled={loading}
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-green-500/20 transition-all duration-300 pl-10 pr-12"
+                        className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 transition-all duration-300 pl-10 pr-12"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-400 transition-colors duration-300"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors duration-300"
                         disabled={loading}
                       >
                         {showConfirmPassword ? (
@@ -251,14 +248,14 @@ export default function RegisterPage() {
                     </div>
                     {errors.confirmPassword && (
                       <FadeIn>
-                        <p className="text-sm text-red-300">{errors.confirmPassword}</p>
+                        <p className="text-sm text-destructive">{errors.confirmPassword}</p>
                       </FadeIn>
                     )}
                   </div>
 
                   {errors.general && (
                     <FadeIn>
-                      <div className="text-sm text-red-300 bg-red-900/30 border border-red-700/50 p-4 rounded-lg backdrop-blur-sm">
+                      <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-lg backdrop-blur-sm">
                         {errors.general}
                       </div>
                     </FadeIn>
@@ -267,7 +264,7 @@ export default function RegisterPage() {
                   <ScaleOnHover scale={1.02}>
                     <Button 
                       type="submit" 
-                      className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300" 
+                      className="w-full gradient-primary text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300" 
                       disabled={loading}
                     >
                       {loading ? (
@@ -286,11 +283,11 @@ export default function RegisterPage() {
                 </form>
 
                 <div className="mt-8 text-center">
-                  <p className="text-gray-300">
+                  <p className="text-muted-foreground">
                     Já tem uma conta?{' '}
                     <Link 
                       href="/entrar" 
-                      className="font-semibold text-blue-400 hover:text-blue-300 transition-colors duration-300"
+                      className="font-semibold text-primary hover:text-primary/80 transition-colors duration-300"
                     >
                       Faça login aqui
                     </Link>
@@ -306,7 +303,7 @@ export default function RegisterPage() {
             <ScaleOnHover scale={1.05}>
               <Link 
                 href="/" 
-                className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-300"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar para a página inicial

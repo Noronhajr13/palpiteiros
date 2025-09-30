@@ -206,9 +206,9 @@ export default function CriarBolaoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-card/80 backdrop-blur-sm shadow-sm border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" asChild>
@@ -218,10 +218,10 @@ export default function CriarBolaoPage() {
               </Link>
             </Button>
             <div className="flex items-center gap-3">
-              <Trophy className="h-6 w-6 text-blue-600" />
+              <Trophy className="h-6 w-6 text-primary" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Criar Novo Bolão</h1>
-                <p className="text-sm text-gray-600">Configure seu bolão personalizado</p>
+                <h1 className="text-xl font-bold text-foreground">Criar Novo Bolão</h1>
+                <p className="text-sm text-muted-foreground">Configure seu bolão personalizado</p>
               </div>
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function CriarBolaoPage() {
       </header>
 
       {/* Breadcrumbs */}
-      <div className="bg-gradient-to-r from-gray-50 to-blue-50/30 border-b">
+      <div className="bg-muted/30 border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <BreadcrumbCard>
             <ActionBreadcrumbs action="criar-bolao" />
@@ -244,7 +244,7 @@ export default function CriarBolaoPage() {
             totalSteps={8}
             currentStep={calculateFormProgress()}
             stepTitles={["Informações", "Premiação", "Avançado"]}
-            className="bg-white p-6 rounded-xl shadow-lg border border-blue-100"
+            className="bg-card p-6 rounded-xl shadow-lg border border-border"
           />
         </div>
 
@@ -253,7 +253,7 @@ export default function CriarBolaoPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-blue-600" />
+                <Trophy className="h-5 w-5 text-primary" />
                 Informações Básicas
               </CardTitle>
               <CardDescription>
@@ -647,7 +647,7 @@ export default function CriarBolaoPage() {
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <h4 className="font-semibold text-blue-800 mb-2">💡 Exemplos de Configuração:</h4>
-                  <div className="text-sm text-blue-700 space-y-1">
+                  <div className="text-sm text-accent space-y-1">
                     <p><strong>Conservador:</strong> 10 / 5 / 1 / 1x / 0</p>
                     <p><strong>Moderado:</strong> 15 / 7 / 2 / 1.5x / 3</p>
                     <p><strong>Agressivo:</strong> 20 / 10 / 3 / 2x / 5</p>
@@ -659,7 +659,7 @@ export default function CriarBolaoPage() {
 
           {/* Erro Geral */}
           {errors.general && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
               {errors.general}
             </div>
           )}
@@ -700,7 +700,7 @@ export default function CriarBolaoPage() {
           <CardHeader>
             <CardTitle className="text-sm">ℹ️ Como Funcionará</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-gray-600 space-y-2">
+          <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>1. Após criar o bolão, você receberá um <strong>código único</strong></p>
             <p>2. Compartilhe este código com seus amigos</p>
             <p>3. Eles poderão entrar no bolão usando este código</p>

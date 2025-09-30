@@ -58,42 +58,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-green-600/5"></div>
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500"></div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]"></div>
+      <div className="absolute top-0 left-0 w-full h-1 gradient-primary"></div>
       
       <div className="w-full max-w-md relative z-10">
-        {/* Header Premium */}
+        {/* Header Moderno */}
         <FadeIn direction="down">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-75"></div>
-                <div className="relative w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Trophy className="h-7 w-7 text-white" />
-                </div>
+              <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center">
+                <Trophy className="h-7 w-7 text-white" />
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold gradient-text">
                 Palpiteiros
               </h1>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Bem-vindo de volta! 👋</h2>
-            <p className="text-gray-300">Entre com sua conta para continuar palpitando</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Bem-vindo de volta! 👋</h2>
+            <p className="text-muted-foreground">Entre com sua conta para continuar palpitando</p>
           </div>
         </FadeIn>
 
         <FadeIn delay={0.1}>
           <ScaleOnHover scale={1.02}>
-            <Card className="shadow-2xl bg-gray-800/30 backdrop-blur-sm border-gray-700/50 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-white text-xl flex items-center gap-2">
-                  <LogIn className="h-5 w-5 text-blue-400" />
+            <Card className="shadow-2xl bg-card backdrop-blur-sm border-border relative overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-foreground text-xl flex items-center gap-2">
+                  <LogIn className="h-5 w-5 text-primary" />
                   Fazer Login
                 </CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardDescription className="text-muted-foreground">
                   Entre com seu email e senha para acessar seus bolões
                 </CardDescription>
               </CardHeader>
@@ -101,7 +96,7 @@ export default function LoginPage() {
               <CardContent className="relative z-10">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-200 font-medium">Email</Label>
+                    <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
                     <Input
                       id="email"
                       name="email"
@@ -111,12 +106,12 @@ export default function LoginPage() {
                       onChange={handleChange}
                       required
                       disabled={loading}
-                      className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300"
+                      className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 transition-all duration-300"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-gray-200 font-medium">Senha</Label>
+                    <Label htmlFor="password" className="text-foreground font-medium">Senha</Label>
                     <div className="relative">
                       <Input
                         id="password"
@@ -127,12 +122,12 @@ export default function LoginPage() {
                         onChange={handleChange}
                         required
                         disabled={loading}
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 pr-12"
+                        className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 transition-all duration-300 pr-12"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors duration-300"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors duration-300"
                         disabled={loading}
                       >
                         {showPassword ? (
@@ -155,7 +150,7 @@ export default function LoginPage() {
                   <ScaleOnHover scale={1.02}>
                     <Button 
                       type="submit" 
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300" 
+                      className="w-full gradient-primary text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300" 
                       disabled={loading}
                     >
                       {loading ? (
@@ -174,11 +169,11 @@ export default function LoginPage() {
                 </form>
 
                 <div className="mt-8 text-center">
-                  <p className="text-gray-300">
+                  <p className="text-muted-foreground">
                     Ainda não tem conta?{' '}
                     <Link 
                       href="/cadastrar" 
-                      className="font-semibold text-blue-400 hover:text-blue-300 transition-colors duration-300"
+                      className="font-semibold text-primary hover:text-primary/80 transition-colors duration-300"
                     >
                       Cadastre-se aqui
                     </Link>
@@ -187,13 +182,13 @@ export default function LoginPage() {
 
                 {/* Demo credentials Premium */}
                 <FadeIn delay={0.2}>
-                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm border border-blue-500/20 rounded-lg">
-                    <p className="text-sm font-semibold text-blue-300 mb-3 flex items-center gap-2">
+                  <div className="mt-6 p-4 bg-accent/10 backdrop-blur-sm border border-accent/20 rounded-lg">
+                    <p className="text-sm font-semibold text-accent mb-3 flex items-center gap-2">
                       🎯 Dados para teste:
                     </p>
-                    <div className="text-sm text-blue-200 space-y-2 bg-gray-800/30 p-3 rounded border border-blue-500/10">
-                      <p><strong className="text-blue-300">Email:</strong> joao@palpiteiros.com</p>
-                      <p><strong className="text-blue-300">Senha:</strong> 123456</p>
+                    <div className="text-sm text-muted-foreground space-y-2 bg-muted/30 p-3 rounded border border-accent/10">
+                      <p><strong className="text-accent">Email:</strong> joao@palpiteiros.com</p>
+                      <p><strong className="text-accent">Senha:</strong> 123456</p>
                     </div>
                   </div>
                 </FadeIn>
@@ -207,7 +202,7 @@ export default function LoginPage() {
             <ScaleOnHover scale={1.05}>
               <Link 
                 href="/" 
-                className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-300"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar para a página inicial
