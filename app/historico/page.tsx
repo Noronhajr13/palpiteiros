@@ -42,11 +42,11 @@ export default function HistoricoPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'correto-exato':
-        return <CheckCircle className="h-4 w-4 text-green-400" />
+        return <CheckCircle className="h-4 w-4 text-accent" />
       case 'correto-resultado':
-        return <Target className="h-4 w-4 text-blue-400" />
+        return <Target className="h-4 w-4 text-primary" />
       case 'erro':
-        return <XCircle className="h-4 w-4 text-red-400" />
+        return <XCircle className="h-4 w-4 text-destructive" />
       case 'pendente':
         return <Clock className="h-4 w-4 text-yellow-400" />
       default:
@@ -76,28 +76,28 @@ export default function HistoricoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-6">
           {/* Breadcrumb */}
           <BreadcrumbCard>
-            <Link href="/meus-boloes" className="text-gray-400 hover:text-gray-300">
+            <Link href="/meus-boloes" className="text-muted-foreground hover:text-foreground">
               Dashboard
             </Link>
-            <span className="text-gray-600">/</span>
-            <span className="text-gray-100">Histórico</span>
+            <span className="text-muted-foreground">/</span>
+            <span className="text-foreground">Histórico</span>
           </BreadcrumbCard>
 
           {/* Header */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-card border-border">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <CardTitle className="text-gray-100 flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
                     Histórico de Palpites
                   </CardTitle>
-                  <p className="text-gray-400 mt-1">
+                  <p className="text-muted-foreground mt-1">
                     Acompanhe todos os seus palpites e resultados
                   </p>
                 </div>
