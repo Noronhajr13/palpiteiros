@@ -201,25 +201,25 @@ export default function PalpitesPage({ params }: PalpitesPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md shadow-lg border-b border-blue-100">
+      <header className="bg-card/90 backdrop-blur-md shadow-lg border-b border-border">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild className="hover:bg-blue-50 transition-colors">
+              <Button variant="ghost" size="sm" asChild className="hover:bg-accent/20 transition-colors">
                 <Link href={`/bolao/${bolaoAtual.id}`}>
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Voltar
                 </Link>
               </Button>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                <div className="p-2 gradient-primary rounded-lg">
                   <Target className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold gradient-text">
                     Seus Palpites
                   </h1>
-                  <p className="text-sm text-gray-600 font-medium">{bolaoAtual.nome}</p>
+                  <p className="text-sm text-muted-foreground font-medium">{bolaoAtual.nome}</p>
                 </div>
               </div>
             </div>
@@ -228,7 +228,7 @@ export default function PalpitesPage({ params }: PalpitesPageProps) {
       </header>
 
       {/* Breadcrumbs */}
-      <div className="bg-gradient-to-r from-gray-50 to-blue-50/30 border-b">
+      <div className="bg-muted/30 border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <BreadcrumbCard>
             <BolaoBreadcrumbs 
@@ -242,37 +242,37 @@ export default function PalpitesPage({ params }: PalpitesPageProps) {
 
       <main className="container mx-auto px-4 py-8">
         {/* Instruções */}
-        <Card className="mb-8 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-green-500/5 border-0 shadow-xl">
+        <Card className="mb-8 bg-card/80 border border-border shadow-xl">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <CardTitle className="text-xl gradient-text">
               Sistema de Pontuação
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center group hover:scale-105 transition-transform duration-200">
-                <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg mb-3">
+                <div className="p-4 bg-accent/80 rounded-2xl shadow-lg mb-3">
                   <div className="text-3xl font-bold text-white">10</div>
-                  <div className="text-sm text-green-100 font-medium">PONTOS</div>
+                  <div className="text-sm text-accent-foreground font-medium">PONTOS</div>
                 </div>
-                <div className="text-sm font-semibold text-gray-700">Placar Exato</div>
-                <div className="text-xs text-gray-500">Acertou tudo!</div>
+                <div className="text-sm font-semibold text-foreground">Placar Exato</div>
+                <div className="text-xs text-muted-foreground">Acertou tudo!</div>
               </div>
               <div className="text-center group hover:scale-105 transition-transform duration-200">
-                <div className="p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-3">
+                <div className="p-4 bg-primary/80 rounded-2xl shadow-lg mb-3">
                   <div className="text-3xl font-bold text-white">5</div>
-                  <div className="text-sm text-blue-100 font-medium">PONTOS</div>
+                  <div className="text-sm text-primary-foreground font-medium">PONTOS</div>
                 </div>
-                <div className="text-sm font-semibold text-gray-700">Resultado Correto</div>
-                <div className="text-xs text-gray-500">Acertou o vencedor</div>
+                <div className="text-sm font-semibold text-foreground">Resultado Correto</div>
+                <div className="text-xs text-muted-foreground">Acertou o vencedor</div>
               </div>
               <div className="text-center group hover:scale-105 transition-transform duration-200">
-                <div className="p-4 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl shadow-lg mb-3">
-                  <div className="text-3xl font-bold text-white">0</div>
-                  <div className="text-sm text-gray-200 font-medium">PONTOS</div>
+                <div className="p-4 bg-muted rounded-2xl shadow-lg mb-3">
+                  <div className="text-3xl font-bold text-muted-foreground">0</div>
+                  <div className="text-sm text-muted-foreground font-medium">PONTOS</div>
                 </div>
-                <div className="text-sm font-semibold text-gray-700">Palpite Errado</div>
-                <div className="text-xs text-gray-500">Mais sorte na próxima!</div>
+                <div className="text-sm font-semibold text-foreground">Palpite Errado</div>
+                <div className="text-xs text-muted-foreground">Mais sorte na próxima!</div>
               </div>
             </div>
           </CardContent>
