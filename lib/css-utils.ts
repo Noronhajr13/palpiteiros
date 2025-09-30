@@ -1,117 +1,134 @@
 /**
- * Utilitários de CSS customizáveis para toda aplicação
- * Centralizando padrões visuais que se repetem
+ * 🎨 Design System Unificado - Dark Mode Moderno
+ * Utilitários consistentes para toda aplicação
  */
 
-// Gradientes padronizados da aplicação
+// 🎨 Sistema de Cores Unificado
+export const colors = {
+  // Surfaces
+  background: "bg-background",
+  surface: "bg-surface hover:bg-surface-hover",
+  card: "bg-card",
+  
+  // Text
+  primary: "text-foreground",
+  secondary: "text-muted-foreground", 
+  subtle: "text-text-subtle",
+  
+  // Borders
+  border: "border-border",
+  borderStrong: "border-border-strong",
+} as const
+
+// 🌟 Sistema de Gradientes (Uso Seletivo)
 export const gradients = {
-  // Gradientes principais
-  primary: "bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700",
-  primaryHover: "hover:bg-gradient-to-r hover:from-blue-600 hover:via-blue-700 hover:to-blue-800",
+  // Apenas para CTAs importantes e logos
+  primary: "gradient-primary",
+  text: "gradient-text",
   
-  // Gradientes de destaque
-  accent: "bg-gradient-to-r from-purple-500 via-purple-600 to-indigo-600",
-  accentHover: "hover:bg-gradient-to-r hover:from-purple-600 hover:via-purple-700 hover:to-indigo-700",
-  
-  // Gradientes de sucesso
-  success: "bg-gradient-to-r from-green-500 via-green-600 to-emerald-600",
-  successHover: "hover:bg-gradient-to-r hover:from-green-600 hover:via-green-700 hover:to-emerald-700",
-  
-  // Gradientes de fundo
-  pageBackground: "bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
-  cardBackground: "bg-white dark:bg-gray-800",
-  
-  // Gradientes de texto
-  textGradient: "bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent",
-  
-  // Gradientes especiais
-  glass: "bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm",
+  // Classes tradicionais para compatibilidade
+  cta: "bg-gradient-to-r from-primary to-accent",
+  ctaHover: "hover:from-primary-hover hover:to-accent-hover",
 } as const
 
-// Classes de sombra padronizadas
+// 🎭 Sistema de Sombras Minimalistas
 export const shadows = {
-  card: "shadow-lg hover:shadow-xl transition-shadow duration-300",
-  cardHover: "hover:shadow-2xl transition-shadow duration-300",
-  button: "shadow-md hover:shadow-lg transition-shadow duration-200",
-  modal: "shadow-2xl",
-  floating: "shadow-xl border border-gray-200 dark:border-gray-700",
+  card: "shadow-lg shadow-black/10",
+  cardHover: "hover:shadow-xl hover:shadow-black/20 transition-shadow duration-300",
+  button: "shadow-md shadow-black/10 hover:shadow-lg hover:shadow-black/20 transition-shadow duration-200",
+  modal: "shadow-2xl shadow-black/30",
+  floating: "shadow-xl shadow-black/20 border-border-strong",
 } as const
 
-// Classes de texto responsivas
+// 🏗️ Sistema de Cards Unificado
+export const cards = {
+  base: "bg-card border-border rounded-xl shadow-lg",
+  interactive: "bg-card border-border rounded-xl shadow-lg hover:shadow-xl hover:border-border-strong transition-all duration-200",
+  surface: "bg-surface border-border rounded-lg",
+  elevated: "bg-card border-border-strong rounded-xl shadow-xl",
+} as const
+
+// ✍️ Sistema de Tipografia Moderno
 export const typography = {
-  // Títulos
-  h1: "text-3xl md:text-4xl lg:text-5xl font-bold",
-  h2: "text-2xl md:text-3xl lg:text-4xl font-bold",
-  h3: "text-xl md:text-2xl lg:text-3xl font-semibold",
-  h4: "text-lg md:text-xl font-semibold",
+  // Hierarchy
+  h1: "text-3xl md:text-4xl lg:text-5xl font-bold text-foreground",
+  h2: "text-2xl md:text-3xl lg:text-4xl font-bold text-foreground", 
+  h3: "text-xl md:text-2xl lg:text-3xl font-semibold text-foreground",
+  h4: "text-lg md:text-xl font-semibold text-foreground",
   
-  // Texto do corpo
-  body: "text-base leading-relaxed",
-  bodyLarge: "text-lg leading-relaxed",
-  bodySmall: "text-sm",
+  // Body text
+  body: "text-base leading-relaxed text-foreground",
+  bodyLarge: "text-lg leading-relaxed text-foreground",
+  bodySmall: "text-sm text-muted-foreground",
   
-  // Texto com cores semânticas
-  muted: "text-gray-600 dark:text-gray-400",
-  mutedSmall: "text-sm text-gray-500 dark:text-gray-500",
+  // Semantic text
+  muted: "text-muted-foreground",
+  subtle: "text-text-subtle",
   
-  // Gradientes de texto
-  gradient: "bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent",
-  gradientGold: "bg-gradient-to-r from-yellow-500 via-yellow-600 to-orange-600 bg-clip-text text-transparent",
+  // Special text (selective use)
+  gradient: "gradient-text font-bold",
+  accent: "text-primary font-semibold",
 } as const
 
-// Classes de layout responsivo
+// 📐 Sistema de Layout Consistente
 export const layout = {
   // Containers
   container: "container mx-auto px-4 py-8 max-w-6xl",
   containerSmall: "container mx-auto px-4 py-6 max-w-4xl",
   
-  // Grids responsivos
+  // Grids
   gridCards: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
   gridStats: "grid grid-cols-2 md:grid-cols-4 gap-4",
   
-  // Flex layouts
+  // Flex
   flexCenter: "flex items-center justify-center",
-  flexBetween: "flex items-center justify-between",
+  flexBetween: "flex items-center justify-between", 
   flexColumn: "flex flex-col space-y-4",
   
-  // Espaçamentos
+  // Spacing
   spacing: "space-y-6",
   spacingLarge: "space-y-8",
   spacingSmall: "space-y-4",
 } as const
 
-// Classes de animação
+// 🎭 Sistema de Animações Suaves
 export const animations = {
-  // Hover effects
-  hoverScale: "hover:scale-105 transition-transform duration-200",
-  hoverScaleSmall: "hover:scale-102 transition-transform duration-150",
+  // Subtle interactions
+  hover: "hover:scale-[1.02] transition-all duration-200",
+  hoverButton: "hover:scale-[1.05] transition-all duration-150",
   
-  // Fade in
-  fadeIn: "animate-in fade-in duration-500",
-  slideUp: "animate-in slide-in-from-bottom-4 duration-500",
+  // Smooth entrances
+  fadeIn: "animate-in fade-in duration-500 ease-out",
+  slideUp: "animate-in slide-in-from-bottom-4 duration-400 ease-out",
   
-  // Loading
+  // Loading states
   pulse: "animate-pulse",
-  spin: "animate-spin",
-  
-  // Buttons
-  buttonHover: "hover:scale-105 hover:shadow-lg transition-all duration-200",
+  bounce: "animate-gentle-bounce",
 } as const
 
-// Classes de estado
+// 🎯 Sistema de Botões Unificado
+export const buttons = {
+  primary: "bg-primary hover:bg-primary-hover text-primary-foreground shadow-button rounded-lg px-4 py-2 font-medium transition-all duration-200",
+  secondary: "bg-surface hover:bg-surface-hover text-foreground border border-border shadow-button rounded-lg px-4 py-2 font-medium transition-all duration-200",
+  accent: "bg-accent hover:bg-accent-hover text-accent-foreground shadow-button rounded-lg px-4 py-2 font-medium transition-all duration-200",
+  success: "bg-success hover:bg-success/90 text-success-foreground shadow-button rounded-lg px-4 py-2 font-medium transition-all duration-200",
+  destructive: "bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-button rounded-lg px-4 py-2 font-medium transition-all duration-200",
+} as const
+
+// 🎨 Estados Semânticos
 export const states = {
   // Loading states
-  skeleton: "animate-pulse bg-gray-200 dark:bg-gray-700 rounded",
+  skeleton: "animate-pulse bg-surface rounded",
   
   // Interactive states
   interactive: "cursor-pointer transition-all duration-200",
   disabled: "opacity-50 cursor-not-allowed",
   
   // Status colors
-  success: "text-green-600 dark:text-green-400",
-  error: "text-red-600 dark:text-red-400",
-  warning: "text-yellow-600 dark:text-yellow-400",
-  info: "text-blue-600 dark:text-blue-400",
+  success: "text-success",
+  error: "text-destructive",
+  warning: "text-warning",
+  info: "text-primary",
 } as const
 
 // Classes de componentes específicos

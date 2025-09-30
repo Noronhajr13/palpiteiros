@@ -8,30 +8,27 @@ import { FadeIn, ScaleOnHover } from "@/components/ui/animations"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
-      {/* Header Premium */}
+    <div className="min-h-screen bg-background">
+      {/* Header Moderno */}
       <FadeIn direction="down">
-        <header className="container mx-auto px-4 py-6 sticky top-0 z-50 bg-gray-900/50 backdrop-blur-xl border-b border-gray-700/50">
+        <header className="container mx-auto px-4 py-6 sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-75"></div>
-                <div className="relative w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Trophy className="h-6 w-6 text-white" />
-                </div>
+              <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center">
+                <Trophy className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold gradient-text">
                 Palpiteiros
               </h1>
             </div>
             <div className="flex items-center gap-3">
               <ScaleOnHover scale={1.05}>
-                <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-300" asChild>
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-surface transition-all duration-300" asChild>
                   <Link href="/entrar">Entrar</Link>
                 </Button>
               </ScaleOnHover>
               <ScaleOnHover scale={1.05}>
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300" asChild>
+                <Button className="gradient-primary shadow-lg hover:shadow-xl transition-all duration-300" asChild>
                   <Link href="/cadastrar">Cadastrar</Link>
                 </Button>
               </ScaleOnHover>
@@ -45,9 +42,9 @@ export default function Home() {
         <div className="max-w-6xl mx-auto text-center">
           {/* Badge */}
           <FadeIn delay={0.1}>
-            <div className="inline-flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-700/50 rounded-full px-6 py-3 mb-8">
-              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-              <span className="text-sm font-medium text-gray-300">
+            <div className="inline-flex items-center gap-2 bg-surface backdrop-blur-sm border border-border rounded-full px-6 py-3 mb-8">
+              <Star className="h-4 w-4 text-primary fill-current" />
+              <span className="text-sm font-medium text-foreground">
                 Bolões entre amigos
               </span>
             </div>
@@ -55,10 +52,10 @@ export default function Home() {
 
           {/* Main Title */}
           <FadeIn delay={0.2}>
-            <h1 className="text-6xl md:text-7xl font-black text-gray-100 mb-6 leading-tight tracking-tight">
+            <h1 className="text-6xl md:text-7xl font-black text-foreground mb-6 leading-tight tracking-tight">
               Seus palpites,
               <br />
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
+              <span className="gradient-text">
                 suas vitórias
               </span>
             </h1>
@@ -66,10 +63,10 @@ export default function Home() {
 
           {/* Subtitle */}
           <FadeIn delay={0.3}>
-            <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
               A plataforma mais divertida para criar bolões com amigos, 
               fazer palpites e competir em tempo real. 
-              <span className="font-semibold text-white">100% gratuito.</span>
+              <span className="font-semibold text-foreground">100% gratuito.</span>
             </p>
           </FadeIn>
 
@@ -79,7 +76,7 @@ export default function Home() {
               <ScaleOnHover scale={1.05}>
                 <Button 
                   size="lg" 
-                  className="text-lg px-10 py-4 h-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl hover:shadow-2xl transition-all duration-300" 
+                  className="text-lg px-10 py-4 h-auto gradient-primary shadow-xl hover:shadow-2xl transition-all duration-300" 
                   asChild
                 >
                   <Link href="/criar-bolao">

@@ -1,43 +1,51 @@
 @import "tailwindcss";
 
-/* Design Dark Elegante - Tema Fixo */
+/* 🎨 Design System Dark Mode Moderno - Unificado */
 @layer base {
   :root {
-    /* Cores base dark */
-    --background: 217 33% 7%;     /* Gray-950 mais azulado */
-    --foreground: 213 31% 91%;    /* Gray-100 mais azulado */
+    /* 🌙 Background System */
+    --background: 222 84% 5%;         /* Rich dark base */
+    --foreground: 210 40% 98%;        /* Pure white text */
     
-    /* Cards e superfícies */
-    --card: 215 28% 10%;          /* Slightly lighter than bg */
-    --card-foreground: 213 31% 91%;
+    /* 📄 Surface System */
+    --card: 222 47% 8%;               /* Elevated surface */
+    --card-foreground: 210 40% 98%;   /* High contrast text */
+    --surface: 220 26% 14%;           /* Interactive surface */
+    --surface-hover: 220 26% 18%;     /* Hover state */
     
-    /* Cores primárias (blue elegante) */
-    --primary: 217 91% 60%;       /* Blue-500 */
-    --primary-foreground: 217 33% 7%;
+    /* 🔵 Primary System (Blue) */
+    --primary: 221 83% 53%;           /* Professional blue */
+    --primary-hover: 221 83% 48%;     /* Darker on hover */
+    --primary-foreground: 222 84% 5%; /* Dark text on blue */
+    --primary-subtle: 221 83% 53% / 0.1; /* 10% opacity */
     
-    /* Cores secundárias (purple elegante) */
-    --secondary: 262 83% 58%;     /* Purple-500 */
-    --secondary-foreground: 213 31% 91%;
+    /* 🟣 Accent System (Purple) */
+    --accent: 262 52% 47%;            /* Subtle purple */
+    --accent-hover: 262 52% 42%;      /* Darker on hover */
+    --accent-foreground: 210 40% 98%; /* White text */
+    --accent-subtle: 262 52% 47% / 0.1; /* 10% opacity */
     
-    /* Muted (para textos secundários) */
-    --muted: 215 25% 15%;         /* Darker gray */
-    --muted-foreground: 217 10% 64%; /* Gray-400 */
+    /* 🎨 Semantic Colors */
+    --success: 142 71% 45%;           /* Clean green */
+    --success-foreground: 210 40% 98%;
+    --warning: 38 92% 50%;            /* Warm orange */
+    --warning-foreground: 222 84% 5%;
+    --destructive: 0 84% 60%;         /* Clear red */
+    --destructive-foreground: 210 40% 98%;
     
-    /* Accent (verde para sucessos) */
-    --accent: 142 76% 36%;        /* Green-600 */
-    --accent-foreground: 213 31% 91%;
+    /* 📝 Text System */
+    --muted: 215 25% 27%;             /* Subtle backgrounds */
+    --muted-foreground: 217 10% 64%;  /* Secondary text */
+    --text-subtle: 217 10% 45%;       /* Tertiary text */
     
-    /* Destrutivos (vermelho) */
-    --destructive: 0 75% 60%;     /* Red-500 */
-    --destructive-foreground: 213 31% 91%;
+    /* 🔲 Border & Input System */
+    --border: 217 15% 25%;            /* Subtle borders */
+    --border-strong: 217 15% 35%;     /* Emphasized borders */
+    --input: 217 15% 25%;             /* Input backgrounds */
+    --ring: 221 83% 53%;              /* Focus rings */
     
-    /* Bordas e inputs */
-    --border: 215 20% 20%;        /* Gray-800 */
-    --input: 215 20% 20%;
-    --ring: 217 91% 60%;          /* Same as primary */
-    
-    /* Border radius */
-    --radius: 0.75rem;
+    /* 📐 Spacing & Radius */
+    --radius: 0.75rem;                /* Consistent rounding */
   }
   
   * {
@@ -48,9 +56,57 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
-  /* Scrollbar dark */
+  /* 🎯 Design System Classes */
+  .surface {
+    background-color: hsl(var(--surface));
+  }
+  
+  .surface-hover:hover {
+    background-color: hsl(var(--surface-hover));
+  }
+  
+  .text-subtle {
+    color: hsl(var(--text-subtle));
+  }
+  
+  .border-strong {
+    border-color: hsl(var(--border-strong));
+  }
+  
+  /* 🌟 Gradient System (Selective Use) */
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* 🎭 Animation System */
+  .animate-gentle-bounce {
+    animation: gentle-bounce 2s ease-in-out infinite;
+  }
+  
+  @keyframes gentle-bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+  
+  /* 📜 Scrollbar Dark */
   ::-webkit-scrollbar {
     width: 8px;
   }
