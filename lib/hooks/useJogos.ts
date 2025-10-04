@@ -18,8 +18,8 @@ interface NovoJogo {
   data: string
   rodada: number
   status?: string
-  placarA?: number
-  placarB?: number
+  placarA?: number | null
+  placarB?: number | null
 }
 
 export function useJogos(bolaoId: string) {

@@ -8,11 +8,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Plus, Upload, Download, Calendar, Trophy, Target } from "lucide-react"
+import { ArrowLeft, Plus, Upload, Download, Calendar, Trophy, Target, Edit, Trash2 } from "lucide-react"
 import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
 import { useBolaoStoreDB as useBolaoStore } from '@/lib/stores/useBolaoStoreAPI'
 import { useJogos } from '@/lib/hooks/useJogos'
+import { EditarJogoModal } from '@/components/modals/EditarJogoModal'
+import { ExcluirJogoModal } from '@/components/modals/ExcluirJogoModal'
 import { toast } from "sonner"
+
+interface Jogo {
+  id: string
+  timeA: string
+  timeB: string
+  data: string
+  rodada: number
+  status: 'agendado' | 'finalizado' | 'cancelado' | 'adiado'
+  placarA: number | null
+  placarB: number | null
+}
 
 interface JogosPageProps {
   params: Promise<{ id: string }>
@@ -34,7 +47,13 @@ export default function JogosPage({ params }: JogosPageProps) {
     placarB: ''
   })
 
-  const { jogos: jogosExistentes, loading, adicionarJogo, importarJogos } = useJogos(bolaoId)
+  // Estados para os modais
+  const [jogoParaEditar, setJogoParaEditar] = useState<Jogo | null>(null)
+  const [jogoParaExcluir, setJogoParaExcluir] = useState<Jogo | null>(null)
+  const [modalEditarAberto, setModalEditarAberto] = useState(false)
+  const [modalExcluirAberto, setModalExcluirAberto] = useState(false)
+
+  const { jogos: jogosExistentes, loading, adicionarJogo, atualizarJogo, excluirJogo, importarJogos } = useJogos(bolaoId)
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -191,6 +210,33 @@ export default function JogosPage({ params }: JogosPageProps) {
     window.URL.revokeObjectURL(url)
     
     toast.success('Template baixado!')
+  }
+
+  // Funções para abrir modais
+  const handleEditarJogo = (jogo: Jogo) => {
+    setJogoParaEditar(jogo)
+    setModalEditarAberto(true)
+  }
+
+  const handleExcluirJogo = (jogo: Jogo) => {
+    setJogoParaExcluir(jogo)
+    setModalExcluirAberto(true)
+  }
+
+  // Função para salvar edição
+  const handleSalvarEdicao = async (jogoId: string, dadosAtualizados: Partial<Jogo>) => {
+    await atualizarJogo(jogoId, dadosAtualizados)
+    setModalEditarAberto(false)
+    setJogoParaEditar(null)
+  }
+
+  // Função para confirmar exclusão
+  const handleConfirmarExclusao = async () => {
+    if (jogoParaExcluir) {
+      await excluirJogo(jogoParaExcluir.id)
+      setModalExcluirAberto(false)
+      setJogoParaExcluir(null)
+    }
   }
 
   const handleImportBrasileirao = async () => {
@@ -643,22 +689,28 @@ export default function JogosPage({ params }: JogosPageProps) {
                   {jogosExistentes.map((jogo, index) => (
                     <div 
                       key={index}
-                      className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border"
+                      className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border hover:border-primary/30 transition-colors"
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 flex-1">
                         <Badge 
                           variant={jogo.status === 'finalizado' ? 'default' : 'secondary'}
                           className="min-w-[80px] justify-center"
                         >
                           Rodada {jogo.rodada}
                         </Badge>
-                        <div>
+                        <div className="flex-1">
                           <p className="font-semibold text-foreground">
                             {jogo.timeA} vs {jogo.timeB}
                           </p>
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {new Date(jogo.data).toLocaleDateString('pt-BR')}
+                            {new Date(jogo.data).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                           </p>
                         </div>
                       </div>
@@ -673,6 +725,28 @@ export default function JogosPage({ params }: JogosPageProps) {
                             {jogo.placarA} x {jogo.placarB}
                           </Badge>
                         )}
+                        
+                        {/* Botões de Ação */}
+                        <div className="flex items-center gap-1 ml-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditarJogo(jogo)}
+                            className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                            title="Editar jogo"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleExcluirJogo(jogo)}
+                            className="text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+                            title="Excluir jogo"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -682,6 +756,29 @@ export default function JogosPage({ params }: JogosPageProps) {
           </Card>
         </div>
       </main>
+
+      {/* Modais */}
+      <EditarJogoModal
+        jogo={jogoParaEditar}
+        isOpen={modalEditarAberto}
+        onClose={() => {
+          setModalEditarAberto(false)
+          setJogoParaEditar(null)
+        }}
+        onSave={handleSalvarEdicao}
+        loading={loading}
+      />
+
+      <ExcluirJogoModal
+        jogo={jogoParaExcluir}
+        isOpen={modalExcluirAberto}
+        onClose={() => {
+          setModalExcluirAberto(false)
+          setJogoParaExcluir(null)
+        }}
+        onConfirm={handleConfirmarExclusao}
+        loading={loading}
+      />
     </div>
   )
 }
