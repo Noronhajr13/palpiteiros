@@ -111,7 +111,7 @@ export function useUserProfile(): ProfileData {
 
   useEffect(() => {
     carregarPerfil()
-  }, [isAuthenticated, user?.id])
+  }, [isAuthenticated, user])
 
   return {
     profile,

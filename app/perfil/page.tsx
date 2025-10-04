@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { useUserProfile } from '@/lib/hooks/useUserProfile'
+import { useUserProfile } from '@/lib/hooks/useUserProfileAPI'
 import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
 import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect'
 import { FadeIn, ScaleOnHover } from "@/components/ui/animations"
@@ -137,7 +137,7 @@ export default function PerfilPage() {
                         <div className="p-3 bg-yellow-500/20 rounded-full w-fit mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
                           <Crown className="h-8 w-8 text-yellow-400" />
                         </div>
-                        <p className="text-3xl font-bold text-white mb-1">{profile?.estatisticas?.ranking || '-'}º</p>
+                        <p className="text-3xl font-bold text-white mb-1">{profile?.estatisticas?.ranking ? `${profile.estatisticas.ranking}º` : '-'}</p>
                         <p className="text-sm text-yellow-300 font-medium">Melhor Posição</p>
                       </div>
                     </ScaleOnHover>

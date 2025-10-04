@@ -19,7 +19,7 @@ import {
   Trophy
 } from "lucide-react"
 import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
-import { useHistoricoPalpites } from '@/lib/hooks/useHistoricoPalpites'
+import { useHistoricoPalpites } from '@/lib/hooks/useHistoricoPalpitesAPI'
 import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
 import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect'
 
@@ -120,7 +120,7 @@ export default function HistoricoPage() {
             <Card className="bg-gray-800 border-gray-700">
               <CardContent className="p-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-100">{stats.total}</p>
+                  <p className="text-2xl font-bold text-gray-100">{stats.totalPalpites}</p>
                   <p className="text-sm text-gray-400">Total</p>
                 </div>
               </CardContent>
@@ -257,7 +257,7 @@ export default function HistoricoPage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <h3 className="font-medium text-gray-100">
-                                {palpite.timeA} x {palpite.timeB}
+                                {palpite.jogo.timeA} x {palpite.jogo.timeB}
                               </h3>
                               {getStatusIcon(palpite.status)}
                               {getStatusBadge(palpite.status)}
@@ -266,21 +266,21 @@ export default function HistoricoPage() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                               <div>
                                 <p className="text-gray-400">Bolão</p>
-                                <p className="text-gray-100 font-medium">{palpite.bolaoNome}</p>
+                                <p className="text-gray-100 font-medium">{palpite.jogo.bolao.nome}</p>
                               </div>
                               
                               <div>
                                 <p className="text-gray-400">Seu Palpite</p>
                                 <p className="text-gray-100 font-medium">
-                                  {palpite.palpiteA} - {palpite.palpiteB}
+                                  {palpite.palpite.placarA} - {palpite.palpite.placarB}
                                 </p>
                               </div>
                               
                               <div>
                                 <p className="text-gray-400">Resultado</p>
                                 <p className="text-gray-100 font-medium">
-                                  {palpite.resultadoA !== undefined 
-                                    ? `${palpite.resultadoA} - ${palpite.resultadoB}` 
+                                  {palpite.jogo.placarA !== null 
+                                    ? `${palpite.jogo.placarA} - ${palpite.jogo.placarB}` 
                                     : 'Pendente'
                                   }
                                 </p>
@@ -297,21 +297,21 @@ export default function HistoricoPage() {
                             <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
-                                {new Date(palpite.data).toLocaleDateString('pt-BR')}
+                                {new Date(palpite.jogo.data).toLocaleDateString('pt-BR')}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Hash className="h-3 w-3" />
-                                Rodada {palpite.rodada}
+                                Rodada {palpite.jogo.rodada}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Trophy className="h-3 w-3" />
-                                {palpite.campeonato}
+                                {palpite.jogo.bolao.nome}
                               </span>
                             </div>
                           </div>
                           
                           <div className="flex gap-2">
-                            <Link href={`/bolao/${palpite.bolaoId}`}>
+                            <Link href={`/bolao/${palpite.jogo.bolao.id}`}>
                               <Button
                                 variant="outline"
                                 size="sm"

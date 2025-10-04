@@ -8,5 +8,9 @@
     "shadcn",
     "Sonner",
     "Supabase"
-  ]
+  ],
+  "github.copilot.enable": {
+    "*": true
+  },
+  "github.copilot.editor.enableAutoCompletions": true
 }

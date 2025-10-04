@@ -6,27 +6,25 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Download, Share, Calendar, Filter } from "lucide-react"
 import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
-import { AdvancedStats, useStatsData } from '@/components/ui/advanced-stats'
+import { AdvancedStats } from '@/components/ui/advanced-stats'
 import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
+import { useEstatisticas } from '@/lib/hooks/useEstatisticas'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { TrendingUp, Trophy, Target, BarChart3 } from "lucide-react"
 
 export default function EstatisticasPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
-  const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<'all' | 'month' | 'quarter'>('all')
-
-  // Dados de estatísticas (mock)
-  const statsData = useStatsData()
+  
+  const { estatisticas, loading, error } = useEstatisticas(timeRange)
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/entrar')
       return
     }
-
-    // Simular carregamento
-    const timer = setTimeout(() => setLoading(false), 1000)
-    return () => clearTimeout(timer)
   }, [isAuthenticated, router])
 
   if (!isAuthenticated || !user) {
@@ -151,11 +149,119 @@ export default function EstatisticasPage() {
 
       {/* Conteúdo principal */}
       <main className="container mx-auto px-4 py-8">
-        <AdvancedStats 
-          userId={user.id}
-          data={statsData}
-          className="space-y-8"
-        />
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Carregando estatísticas...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-500">Erro ao carregar estatísticas</p>
+          </div>
+        ) : estatisticas ? (
+          <div className="space-y-8">
+            {/* Cards de Estatísticas Principais */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Total de Palpites
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{estatisticas.geral.totalPalpites}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    Taxa de Acertos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">{estatisticas.geral.aproveitamento}%</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Trophy className="h-4 w-4" />
+                    Acertos Exatos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-yellow-600">{estatisticas.geral.acertosExatos}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Pontos Totais
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-600">{estatisticas.geral.pontosTotais}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Top Times */}
+            {estatisticas.porTime.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Melhor Performance por Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {estatisticas.porTime.slice(0, 5).map((time, index) => (
+                      <div key={time.time} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Badge variant="outline">#{index + 1}</Badge>
+                          <span className="font-medium">{time.time}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-primary">{time.aproveitamento}%</div>
+                          <div className="text-sm text-muted-foreground">{time.acertos}/{time.jogos}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Performance por Bolão */}
+            {estatisticas.porBolao.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance por Bolão</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {estatisticas.porBolao.map((bolao, index) => (
+                      <div key={bolao.nome} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div>
+                          <div className="font-medium">{bolao.nome}</div>
+                          <div className="text-sm text-muted-foreground">{bolao.palpites} palpites</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-primary">{bolao.aproveitamento}%</div>
+                          <div className="text-sm text-muted-foreground">{bolao.pontos} pontos</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        ) : null}
         
         {/* Footer da página */}
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">

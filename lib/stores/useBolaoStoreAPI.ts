@@ -61,7 +61,7 @@ interface BolaoState {
   criarBolao: (dados: Partial<Bolao> & { configuracoesPontuacao?: { placarExato: number; resultadoCerto: number; golsExatos: number; multiplicadorFinal: number; bonusSequencia: number; permitePalpiteTardio: boolean } }, usuario: { id: string, nome: string, avatar?: string | null }) => Promise<string>
   entrarBolao: (codigo: string, usuario: { id: string, nome: string, avatar?: string | null }) => Promise<boolean>
   selecionarBolao: (id: string) => void
-  salvarPalpite: () => Promise<boolean>
+  salvarPalpite: (userId: string, bolaoId: string, jogoId: string, placarA: number, placarB: number) => Promise<boolean>
   carregarBoloes: (userId: string) => Promise<void>
   carregarBolao: (id: string) => Promise<void>
 }
@@ -144,14 +144,32 @@ export const useBolaoStoreDB = create<BolaoState>((set, get) => ({
     await get().carregarBolao(id)
   },
 
-  salvarPalpite: async () => {
+  salvarPalpite: async (userId: string, bolaoId: string, jogoId: string, placarA: number, placarB: number) => {
     set({ loading: true })
     
     try {
-      // Por enquanto, vamos simular o salvamento
-      // TODO: Implementar API de palpites /api/palpites/salvar
-      set({ loading: false })
-      return true
+      const response = await fetch('/api/palpites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          bolaoId,
+          jogoId,
+          placarA,
+          placarB
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        set({ loading: false })
+        return true
+      }
+
+      throw new Error(data.error || 'Erro ao salvar palpite')
     } catch (error) {
       console.error('Erro ao salvar palpite:', error)
       set({ loading: false })
@@ -181,11 +199,22 @@ export const useBolaoStoreDB = create<BolaoState>((set, get) => ({
     set({ loading: true })
     
     try {
-      const bolao = get().boloes.find(b => b.id === id)
-      set({ bolaoAtual: bolao || null, loading: false })
+      // Tentar buscar dados completos da API
+      const response = await fetch(`/api/bolao/${id}`)
+      
+      if (response.ok) {
+        const bolaoCompleto = await response.json()
+        set({ bolaoAtual: bolaoCompleto, loading: false })
+      } else {
+        // Fallback para dados da lista local
+        const bolao = get().boloes.find(b => b.id === id)
+        set({ bolaoAtual: bolao || null, loading: false })
+      }
     } catch (error) {
       console.error('Erro ao carregar bolão:', error)
-      set({ loading: false })
+      // Fallback para dados da lista local
+      const bolao = get().boloes.find(b => b.id === id)
+      set({ bolaoAtual: bolao || null, loading: false })
     }
   }
 }))
