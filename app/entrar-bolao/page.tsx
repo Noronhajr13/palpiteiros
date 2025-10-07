@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
@@ -8,14 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Trophy, ArrowLeft, Users, Hash, Loader2, LogIn, AlertCircle } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
+import { useSession } from 'next-auth/react'
 import { useBolaoStoreDB as useBolaoStore } from '@/lib/stores/useBolaoStoreAPI'
 import { ActionBreadcrumbs, BreadcrumbCard } from '@/components/ui/breadcrumbs'
 import { toast } from "sonner"
 
 export default function EntrarBolaoPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { data: session, status } = useSession()
   const { entrarBolao } = useBolaoStore()
   
   const [formData, setFormData] = useState({
@@ -25,10 +25,25 @@ export default function EntrarBolaoPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  if (!isAuthenticated) {
-    router.push('/entrar')
-    return null
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/entrar')
+    }
+  }, [status, router])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    )
   }
+
+  const user = session?.user
+  if (!user) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,9 +59,9 @@ export default function EntrarBolaoPage() {
 
     try {
       const sucesso = await entrarBolao(formData.codigo.trim().toUpperCase(), {
-        id: user!.id,
-        nome: user!.name,
-        avatar: user!.avatar
+        id: user.id || '',
+        nome: user.name || '',
+        avatar: user.image || null
       })
       
       if (sucesso) {

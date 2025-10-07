@@ -1,52 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
+import { getDatabase } from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
   try {
     const { name, email, password } = await request.json()
 
+    // Validações
     if (!name || !email || !password) {
       return NextResponse.json(
-        { error: 'Nome, email e senha são obrigatórios' },
+        { error: 'Todos os campos são obrigatórios' },
         { status: 400 }
       )
     }
 
-    // Verificar se usuário já existe
-    const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() }
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: 'A senha deve ter no mínimo 6 caracteres' },
+        { status: 400 }
+      )
+    }
+
+    // Verificar se email já existe
+    const db = await getDatabase()
+    const existingUser = await db.collection('users').findOne({ 
+      email: email.toLowerCase().trim() 
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Email já está em uso' },
-        { status: 409 }
+        { error: 'Este email já está cadastrado' },
+        { status: 400 }
       )
     }
 
-    // Criar novo usuário
-    const newUser = await prisma.user.create({
-      data: {
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
-        password, // Em produção, usar hash da senha
-        avatar: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 10000000000000)}?w=100&h=100&fit=crop&crop=face`
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Criar usuário
+    const result = await db.collection('users').insertOne({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashedPassword,
+      image: null,
+      emailVerified: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+
+    return NextResponse.json(
+      {
+        message: 'Usuário criado com sucesso!',
+        userId: result.insertedId.toString(),
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        avatar: true
-      }
-    })
-
-    return NextResponse.json({
-      success: true,
-      user: newUser
-    })
-
+      { status: 201 }
+    )
   } catch (error) {
-    console.error('Erro no registro:', error)
+    console.error('Erro ao registrar usuário:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

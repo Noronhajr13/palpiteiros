@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useUserProfile } from '@/lib/hooks/useUserProfileAPI'
-import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
-import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect'
+import { useSession } from 'next-auth/react'
+import { redirect } from 'next/navigation'
 import { FadeIn, ScaleOnHover } from "@/components/ui/animations"
 import { 
   User, 
@@ -20,10 +20,14 @@ import {
 } from 'lucide-react'
 
 export default function PerfilPage() {
-  const { user } = useAuthStore()
+  const { data: session, status } = useSession()
   const { profile, loading } = useUserProfile()
   
-  useAuthRedirect()
+  if (status === 'unauthenticated') {
+    redirect('/entrar')
+  }
+
+  const user = session?.user
 
   if (loading) {
     return (

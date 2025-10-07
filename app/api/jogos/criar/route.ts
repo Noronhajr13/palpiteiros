@@ -1,43 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { getDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { bolaoId, timeA, timeB, data, rodada, status, placarA, placarB } = body
+    const { bolaoId, timeAId, timeBId, timeA, timeB, data, rodada, status, placarA, placarB } = body
 
-    if (!bolaoId || !timeA || !timeB || !data || !rodada) {
+    if (!bolaoId || (!timeAId && !timeA) || (!timeBId && !timeB) || !data || !rodada) {
       return NextResponse.json({ 
-        error: 'Campos obrigatórios: bolaoId, timeA, timeB, data, rodada' 
+        error: 'Campos obrigatórios: bolaoId, (timeAId ou timeA), (timeBId ou timeB), data, rodada' 
       }, { status: 400 })
     }
 
+    const db = await getDatabase()
+
     // Validar se o bolão existe
-    const bolao = await prisma.bolao.findUnique({
-      where: { id: bolaoId }
+    const bolao = await db.collection('boloes').findOne({
+      _id: ObjectId.isValid(bolaoId) ? new ObjectId(bolaoId) : bolaoId
     })
 
     if (!bolao) {
       return NextResponse.json({ error: 'Bolão não encontrado' }, { status: 404 })
     }
 
-    // Criar o jogo
-    const novoJogo = await prisma.jogo.create({
-      data: {
-        bolaoId,
-        timeA,
-        timeB,
-        data: new Date(data),
-        rodada: parseInt(rodada),
-        status: status || 'agendado',
-        placarA: placarA ? parseInt(placarA) : null,
-        placarB: placarB ? parseInt(placarB) : null
-      }
-    })
+    // Criar o jogo com suporte a IDs e nomes dos times
+    const novoJogoData = {
+      bolaoId,
+      timeAId: timeAId || null,
+      timeBId: timeBId || null,
+      timeA: timeA || timeAId, // Fallback para ID se nome não fornecido
+      timeB: timeB || timeBId, // Fallback para ID se nome não fornecido
+      data: new Date(data),
+      rodada: parseInt(rodada),
+      status: status || 'agendado',
+      placarA: placarA ? parseInt(placarA) : null,
+      placarB: placarB ? parseInt(placarB) : null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
 
-    return NextResponse.json(novoJogo, { status: 201 })
+    const result = await db.collection('jogos').insertOne(novoJogoData)
+
+    const novoJogo = {
+      id: result.insertedId.toString(),
+      ...novoJogoData
+    }
+
+    return NextResponse.json({ success: true, jogo: novoJogo }, { status: 201 })
 
   } catch (error) {
     console.error('Erro ao criar jogo:', error)

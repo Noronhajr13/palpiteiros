@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getDatabase } from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,13 +12,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const db = await getDatabase()
+
     // Buscar bolão pelo código
-    const bolao = await prisma.bolao.findUnique({
-      where: { codigo },
-      include: {
-        participantes: true
-      }
-    })
+    const bolao = await db.collection('boloes').findOne({ codigo })
 
     if (!bolao) {
       return NextResponse.json(
@@ -27,42 +24,61 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const bolaoId = bolao._id.toString()
+
     // Verificar se usuário já participa
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const jaParticipa = bolao.participantes.some((p: any) => p.userId === userId)
+    const participacaoExistente = await db.collection('participantes').findOne({
+      userId,
+      bolaoId
+    })
     
-    if (jaParticipa) {
+    if (participacaoExistente) {
       return NextResponse.json({
         success: true,
         message: 'Você já participa deste bolão'
       })
     }
 
-    // Verificar limite de participantes
-    if (bolao.participantes.length >= bolao.maxParticipantes) {
+    // Verificar limite de participantes (apenas aprovados)
+    const participantesAprovados = await db.collection('participantes').countDocuments({
+      bolaoId,
+      status: 'aprovado'
+    })
+
+    if (participantesAprovados >= bolao.maxParticipantes) {
       return NextResponse.json(
         { error: 'Bolão já atingiu o limite máximo de participantes' },
         { status: 409 }
       )
     }
 
+    // Determinar status inicial baseado em entradaAutomatica
+    const statusInicial = bolao.entradaAutomatica ? 'aprovado' : 'pendente'
+    const aprovadoEm = bolao.entradaAutomatica ? new Date() : null
+
     // Adicionar usuário ao bolão
-    await prisma.participante.create({
-      data: {
-        userId,
-        bolaoId: bolao.id,
-        pontos: 0,
-        posicao: bolao.participantes.length + 1,
-        palpitesCorretos: 0,
-        totalPalpites: 0
-      }
+    await db.collection('participantes').insertOne({
+      userId,
+      bolaoId,
+      pontos: 0,
+      posicao: participantesAprovados + 1,
+      palpitesCorretos: 0,
+      totalPalpites: 0,
+      status: statusInicial,
+      solicitadoEm: new Date(),
+      aprovadoEm,
+      createdAt: new Date(),
+      updatedAt: new Date()
     })
 
     return NextResponse.json({
       success: true,
-      message: 'Você entrou no bolão com sucesso!',
+      message: bolao.entradaAutomatica 
+        ? 'Você entrou no bolão com sucesso!' 
+        : 'Solicitação enviada! Aguarde aprovação do administrador.',
+      aprovadoAutomaticamente: bolao.entradaAutomatica,
       bolao: {
-        id: bolao.id,
+        id: bolaoId,
         nome: bolao.nome,
         codigo: bolao.codigo
       }

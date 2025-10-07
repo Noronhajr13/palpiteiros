@@ -1,51 +1,98 @@
 @import "tailwindcss";
 
-/* 🎨 Design System Dark Mode Moderno - Unificado */
+/* 🎨 Design System - Clean & Modern (Light Primary / Dark Secondary) */
 @layer base {
   :root {
-    /* 🌙 Background System */
-    --background: 222 84% 5%;         /* Rich dark base */
-    --foreground: 210 40% 98%;        /* Pure white text */
+    /* ☀️ Light Mode (Padrão - Cores Primárias) */
     
-    /* 📄 Surface System */
-    --card: 222 47% 8%;               /* Elevated surface */
-    --card-foreground: 210 40% 98%;   /* High contrast text */
-    --surface: 220 26% 14%;           /* Interactive surface */
-    --surface-hover: 220 26% 18%;     /* Hover state */
+    /* 📄 Background System - Branco suave */
+    --background: 210 20% 98%;        /* Branco levemente acinzentado */
+    --foreground: 222 47% 11%;        /* Preto suave para texto */
     
-    /* 🔵 Primary System (Blue) */
-    --primary: 221 83% 53%;           /* Professional blue */
-    --primary-hover: 221 83% 48%;     /* Darker on hover */
-    --primary-foreground: 222 84% 5%; /* Dark text on blue */
+    /* 📄 Surface System - Tons claros */
+    --card: 0 0% 100%;                /* Branco puro para cards */
+    --card-foreground: 222 47% 11%;   /* Texto escuro nos cards */
+    --surface: 210 20% 96%;           /* Superfície levemente cinza */
+    --surface-hover: 210 20% 93%;     /* Hover um pouco mais escuro */
+    
+    /* 🔵 Primary System - Preto elegante */
+    --primary: 222 47% 11%;           /* Preto suave */
+    --primary-hover: 222 47% 18%;     /* Cinza escuro no hover */
+    --primary-foreground: 0 0% 100%;  /* Texto branco no botão preto */
+    --primary-subtle: 222 47% 11% / 0.05; /* 5% opacity */
+    
+    /* 🟣 Accent System - Cinza médio */
+    --accent: 220 9% 46%;             /* Cinza médio para acentos */
+    --accent-hover: 220 13% 36%;      /* Cinza mais escuro no hover */
+    --accent-foreground: 0 0% 100%;   /* Texto branco */
+    --accent-subtle: 220 9% 46% / 0.1; /* 10% opacity */
+    
+    /* 🎨 Semantic Colors */
+    --success: 142 76% 36%;           /* Verde escuro */
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;            /* Laranja */
+    --warning-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;         /* Vermelho */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* 📝 Text System */
+    --muted: 210 20% 94%;             /* Fundo sutil */
+    --muted-foreground: 220 9% 46%;   /* Texto secundário (cinza médio) */
+    --text-subtle: 220 9% 60%;        /* Texto terciário (cinza claro) */
+    
+    /* 🔲 Border & Input System */
+    --border: 214 32% 91%;            /* Bordas sutis cinza claro */
+    --border-strong: 217 15% 70%;     /* Bordas enfatizadas */
+    --input: 210 20% 96%;             /* Fundo de inputs */
+    --ring: 222 47% 11%;              /* Focus ring preto */
+    
+    /* 📐 Spacing & Radius */
+    --radius: 0.75rem;                /* Arredondamento consistente */
+  }
+  
+  .dark {
+    /* 🌙 Dark Mode (Cores Secundárias - Preto Total) */
+    
+    /* 📄 Background System - Preto profundo */
+    --background: 0 0% 0%;            /* Preto total */
+    --foreground: 0 0% 98%;           /* Branco quase puro */
+    
+    /* 📄 Surface System - Tons escuros */
+    --card: 0 0% 7%;                  /* Cinza muito escuro */
+    --card-foreground: 0 0% 98%;      /* Texto claro */
+    --surface: 0 0% 10%;              /* Superfície escura */
+    --surface-hover: 0 0% 15%;        /* Hover mais claro */
+    
+    /* 🔵 Primary System - Gradiente colorido */
+    --primary: 221 83% 53%;           /* Azul vibrante */
+    --primary-hover: 221 83% 48%;     /* Azul mais escuro */
+    --primary-foreground: 0 0% 100%;  /* Texto branco */
     --primary-subtle: 221 83% 53% / 0.1; /* 10% opacity */
     
-    /* 🟣 Accent System (Purple) */
-    --accent: 262 52% 47%;            /* Subtle purple */
-    --accent-hover: 262 52% 42%;      /* Darker on hover */
-    --accent-foreground: 210 40% 98%; /* White text */
+    /* 🟣 Accent System - Roxo */
+    --accent: 262 52% 47%;            /* Roxo */
+    --accent-hover: 262 52% 42%;      /* Roxo mais escuro */
+    --accent-foreground: 0 0% 98%;    /* Texto claro */
     --accent-subtle: 262 52% 47% / 0.1; /* 10% opacity */
     
     /* 🎨 Semantic Colors */
-    --success: 142 71% 45%;           /* Clean green */
-    --success-foreground: 210 40% 98%;
-    --warning: 38 92% 50%;            /* Warm orange */
-    --warning-foreground: 222 84% 5%;
-    --destructive: 0 84% 60%;         /* Clear red */
-    --destructive-foreground: 210 40% 98%;
+    --success: 142 71% 45%;           /* Verde vibrante */
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 50%;            /* Laranja */
+    --warning-foreground: 0 0% 0%;
+    --destructive: 0 84% 60%;         /* Vermelho */
+    --destructive-foreground: 0 0% 98%;
     
     /* 📝 Text System */
-    --muted: 215 25% 27%;             /* Subtle backgrounds */
-    --muted-foreground: 217 10% 64%;  /* Secondary text */
-    --text-subtle: 217 10% 45%;       /* Tertiary text */
+    --muted: 0 0% 15%;                /* Fundo sutil escuro */
+    --muted-foreground: 0 0% 64%;     /* Texto secundário claro */
+    --text-subtle: 0 0% 50%;          /* Texto terciário */
     
     /* 🔲 Border & Input System */
-    --border: 217 15% 25%;            /* Subtle borders */
-    --border-strong: 217 15% 35%;     /* Emphasized borders */
-    --input: 217 15% 25%;             /* Input backgrounds */
-    --ring: 221 83% 53%;              /* Focus rings */
-    
-    /* 📐 Spacing & Radius */
-    --radius: 0.75rem;                /* Consistent rounding */
+    --border: 0 0% 20%;               /* Bordas escuras */
+    --border-strong: 0 0% 30%;        /* Bordas enfatizadas */
+    --input: 0 0% 15%;                /* Fundo de inputs */
+    --ring: 221 83% 53%;              /* Focus ring azul */
   }
   
   * {
@@ -77,7 +124,7 @@
     border-color: hsl(var(--border-strong));
   }
   
-  /* 🌟 Gradient System (Selective Use) */
+  /* 🌟 Gradient System */
   .gradient-primary {
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
@@ -106,7 +153,7 @@
     }
   }
   
-  /* 📜 Scrollbar Dark */
+  /* 📜 Scrollbar Styling */
   ::-webkit-scrollbar {
     width: 8px;
   }
@@ -116,7 +163,7 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
+    background: hsl(var(--border-strong));
     border-radius: 4px;
   }
   

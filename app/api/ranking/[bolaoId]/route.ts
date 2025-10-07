@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { getDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 export async function GET(
   request: NextRequest,
@@ -10,47 +9,72 @@ export async function GET(
   try {
     const { bolaoId } = await params
 
-    // Buscar participantes com seus dados de usuário
-    const participantes = await prisma.participante.findMany({
-      where: { bolaoId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true
-          }
+    const db = await getDatabase()
+
+    // Buscar participantes com lookup para users
+    const participantes = await db.collection('participantes').aggregate([
+      { $match: { bolaoId, status: 'aprovado' } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
         }
       },
-      orderBy: [
-        { posicao: 'asc' },
-        { pontos: 'desc' },
-        { palpitesCorretos: 'desc' }
-      ]
-    })
+      { $unwind: '$user' },
+      {
+        $sort: { 
+          posicao: 1, 
+          pontos: -1, 
+          palpitesCorretos: -1 
+        }
+      },
+      {
+        $project: {
+          id: { $toString: '$_id' },
+          userId: 1,
+          pontos: 1,
+          posicao: 1,
+          palpitesCorretos: 1,
+          totalPalpites: 1,
+          user: {
+            id: { $toString: '$user._id' },
+            name: '$user.name',
+            avatar: '$user.avatar'
+          }
+        }
+      }
+    ]).toArray()
 
     // Calcular estatísticas gerais do bolão
     const estatisticas = {
       totalParticipantes: participantes.length,
-      totalPalpites: participantes.reduce((acc, p) => acc + p.totalPalpites, 0),
-      totalAcertos: participantes.reduce((acc, p) => acc + p.palpitesCorretos, 0),
+      totalPalpites: participantes.reduce((acc, p) => acc + (p.totalPalpites || 0), 0),
+      totalAcertos: participantes.reduce((acc, p) => acc + (p.palpitesCorretos || 0), 0),
       pontuacaoMedia: participantes.length > 0 
-        ? Math.round(participantes.reduce((acc, p) => acc + p.pontos, 0) / participantes.length)
+        ? Math.round(participantes.reduce((acc, p) => acc + (p.pontos || 0), 0) / participantes.length)
         : 0
     }
 
     // Buscar detalhes do bolão para configurações
-    const bolao = await prisma.bolao.findUnique({
-      where: { id: bolaoId },
-      select: {
-        nome: true,
-        placarExato: true,
-        resultadoCerto: true,
-        golsExatos: true,
-        multiplicadorFinal: true,
-        bonusSequencia: true
-      }
-    })
+    const bolaoObjectId = ObjectId.isValid(bolaoId) ? new ObjectId(bolaoId) : null
+    
+    const bolao = bolaoObjectId 
+      ? await db.collection('boloes').findOne(
+          { _id: bolaoObjectId },
+          {
+            projection: {
+              nome: 1,
+              placarExato: 1,
+              resultadoCerto: 1,
+              golsExatos: 1,
+              multiplicadorFinal: 1,
+              bonusSequencia: 1
+            }
+          }
+        )
+      : null
 
     return NextResponse.json({
       ranking: participantes.map(p => ({
@@ -58,16 +82,23 @@ export async function GET(
         userId: p.userId,
         nome: p.user.name,
         avatar: p.user.avatar,
-        pontos: p.pontos,
-        posicao: p.posicao,
-        palpitesCorretos: p.palpitesCorretos,
-        totalPalpites: p.totalPalpites,
+        pontos: p.pontos || 0,
+        posicao: p.posicao || 0,
+        palpitesCorretos: p.palpitesCorretos || 0,
+        totalPalpites: p.totalPalpites || 0,
         aproveitamento: p.totalPalpites > 0 
           ? Math.round((p.palpitesCorretos / p.totalPalpites) * 100)
           : 0
       })),
       estatisticas,
-      configuracoes: bolao
+      configuracoes: bolao ? {
+        nome: bolao.nome,
+        placarExato: bolao.placarExato,
+        resultadoCerto: bolao.resultadoCerto,
+        golsExatos: bolao.golsExatos,
+        multiplicadorFinal: bolao.multiplicadorFinal,
+        bonusSequencia: bolao.bonusSequencia
+      } : null
     })
 
   } catch (error) {

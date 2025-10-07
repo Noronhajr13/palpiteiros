@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { getDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,14 +13,13 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    const db = await getDatabase()
+
     // Verificar se o usuário participa do bolão
-    const participante = await prisma.participante.findUnique({
-      where: {
-        userId_bolaoId: {
-          userId,
-          bolaoId
-        }
-      }
+    const participante = await db.collection('participantes').findOne({
+      userId,
+      bolaoId,
+      status: 'aprovado'
     })
 
     if (!participante) {
@@ -31,14 +29,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se o jogo existe e não foi finalizado
-    const jogo = await prisma.jogo.findFirst({
-      where: {
-        id: jogoId,
-        bolaoId,
-        status: {
-          in: ['agendado', 'adiado']
-        }
-      }
+    const jogo = await db.collection('jogos').findOne({
+      _id: ObjectId.isValid(jogoId) ? new ObjectId(jogoId) : jogoId,
+      bolaoId,
+      status: { $in: ['agendado', 'adiado'] }
     })
 
     if (!jogo) {
@@ -48,29 +42,41 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se já existe palpite (upsert)
-    const palpite = await prisma.palpite.upsert({
-      where: {
-        jogoId_userId: {
-          jogoId,
-          userId
-        }
-      },
-      update: {
-        placarA: parseInt(placarA),
-        placarB: parseInt(placarB)
-      },
-      create: {
-        jogoId,
-        userId,
-        bolaoId,
-        placarA: parseInt(placarA),
-        placarB: parseInt(placarB)
-      }
+    const palpiteExistente = await db.collection('palpites').findOne({
+      jogoId,
+      userId
     })
+
+    const palpiteData = {
+      jogoId,
+      userId,
+      bolaoId,
+      placarA: parseInt(placarA),
+      placarB: parseInt(placarB),
+      updatedAt: new Date()
+    }
+
+    let palpite
+    if (palpiteExistente) {
+      await db.collection('palpites').updateOne(
+        { _id: palpiteExistente._id },
+        { $set: palpiteData }
+      )
+      palpite = { _id: palpiteExistente._id, ...palpiteData }
+    } else {
+      const result = await db.collection('palpites').insertOne({
+        ...palpiteData,
+        createdAt: new Date()
+      })
+      palpite = { _id: result.insertedId, ...palpiteData }
+    }
 
     return NextResponse.json({ 
       success: true, 
-      palpite,
+      palpite: {
+        id: palpite._id.toString(),
+        ...palpiteData
+      },
       message: 'Palpite salvo com sucesso!' 
     })
 
@@ -84,6 +90,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get('userId')
   const bolaoId = searchParams.get('bolaoId')
+  const rodada = searchParams.get('rodada')
 
   if (!userId || !bolaoId) {
     return NextResponse.json({ 
@@ -92,30 +99,71 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const palpites = await prisma.palpite.findMany({
-      where: {
-        userId,
-        bolaoId
-      },
-      include: {
-        jogo: {
-          select: {
-            id: true,
-            timeA: true,
-            timeB: true,
-            data: true,
-            rodada: true,
-            status: true,
-            placarA: true,
-            placarB: true
-          }
+    const db = await getDatabase()
+
+    // Construir match para filtrar por rodada se fornecido
+    const matchStage: Record<string, unknown> = { 
+      userId, 
+      bolaoId 
+    }
+
+    // Buscar palpites com lookup para jogos
+    const pipeline: Record<string, unknown>[] = [
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: 'jogos',
+          localField: 'jogoId',
+          foreignField: '_id',
+          as: 'jogo'
         }
       },
-      orderBy: [
-        { jogo: { rodada: 'asc' } },
-        { jogo: { data: 'asc' } }
-      ]
-    })
+      { $unwind: '$jogo' }
+    ]
+
+    // Filtrar por rodada se fornecido
+    if (rodada) {
+      pipeline.push({
+        $match: {
+          'jogo.rodada': parseInt(rodada)
+        }
+      })
+    }
+
+    pipeline.push(
+      { 
+        $sort: { 
+          'jogo.rodada': 1, 
+          'jogo.data': 1 
+        } 
+      },
+      {
+        $project: {
+          id: { $toString: '$_id' },
+          jogoId: 1,
+          userId: 1,
+          bolaoId: 1,
+          placarA: 1,
+          placarB: 1,
+          pontos: 1,
+          acertou: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          jogo: {
+            id: { $toString: '$jogo._id' },
+            timeA: '$jogo.timeA',
+            timeB: '$jogo.timeB',
+            data: '$jogo.data',
+            rodada: '$jogo.rodada',
+            status: '$jogo.status',
+            placarA: '$jogo.placarA',
+            placarB: '$jogo.placarB'
+          }
+        }
+      }
+    )
+
+    const palpites = await db.collection('palpites').aggregate(pipeline).toArray()
 
     return NextResponse.json(palpites)
   } catch (error) {

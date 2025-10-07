@@ -1,76 +1,106 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Trophy, ArrowLeft, Users, Gift, Loader2, Plus, Target, Medal, ChevronDown, ChevronUp } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
-import { useBolaoStoreDB as useBolaoStore } from '@/lib/stores/useBolaoStoreAPI'
-import { FormProgress } from '@/components/ui/progress-indicators'
-import { ActionBreadcrumbs, BreadcrumbCard } from '@/components/ui/breadcrumbs'
+import { Textarea } from "@/components/ui/textarea"
+import { Trophy, ArrowLeft, Gift, Loader2, Target, ChevronDown, ChevronUp, Globe, Zap } from "lucide-react"
+import { ParticipantSelector } from '@/components/bolao/ParticipantSelector'
 import { toast } from "sonner"
+
+interface Campeonato {
+  id: string
+  nome: string
+  pais: string
+  logo?: string
+  participantes: Array<{
+    timeId: string
+    nome: string
+    sigla: string
+    escudo?: string
+  }>
+}
 
 export default function CriarBolaoPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
-  const { criarBolao } = useBolaoStore()
+  const { data: session, status } = useSession()
+  
+  const [campeonatos, setCampeonatos] = useState<Campeonato[]>([])
+  const [loadingCampeonatos, setLoadingCampeonatos] = useState(true)
   
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
+    campeonatoId: '',
     maxParticipantes: '20',
-    premio1: '',
-    premio2: '',
-    premio3: '',
-    // Regras de Pontuação Personalizadas
-    pontosPlacarExato: '10',
-    pontosResultadoCerto: '5',
-    pontosGolsExatos: '2',
-    // Premiação por Fases
-    premioPrimeiraTurno: '',
-    premioSegundoTurno: '',
-    premioFaseGrupos: '',
-    premioMataMataTurno: '',
-    // Configurações Avançadas
-    permitirPalpiteTardio: false,
-    multiplicadorFinalJogo: '1',
-    bonusSequencia: '0'
+    
+    tipoPremiacaoTurno: false,
+    tipoPremiacaoGeral: true,
+    premioTurno1: '',
+    premioTurno2: '',
+    premioGeral1: '',
+    premioGeral2: '',
+    premioGeral3: '',
+    
+    modalidadeFaseGrupos: false,
+    modalidadeMataMata: false,
+    
+    pontosPlacarExato: '5',
+    pontosResultadoCerto: '3',
+    pontosGolsExatos: '1',
   })
+  
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [showAdvanced, setShowAdvanced] = useState(false)
-  const [showPremiacaoFases, setShowPremiacaoFases] = useState(false)
+  const [showPontuacao, setShowPontuacao] = useState(false)
+  const [showPremiacao, setShowPremiacao] = useState(true)
+  const [showModalidade, setShowModalidade] = useState(false)
   
-  // Calcular progresso do formulário
-  const calculateFormProgress = () => {
-    let completedFields = 0
-    const totalFields = 8 // Campos obrigatórios + opcionais principais
-    
-    // Campos obrigatórios
-    if (formData.nome.trim()) completedFields++
-    if (formData.descricao.trim()) completedFields++
-    if (formData.maxParticipantes) completedFields++
-    
-    // Campos opcionais
-    if (formData.premio1.trim()) completedFields++
-    if (formData.pontosPlacarExato) completedFields++
-    if (formData.pontosResultadoCerto) completedFields++
-    
-    // Configurações avançadas
-    if (showAdvanced) completedFields++
-    if (showPremiacaoFases) completedFields++
-    
-    return Math.min(completedFields, totalFields)
+  if (status === 'unauthenticated') {
+    redirect('/')
   }
 
-  if (!isAuthenticated) {
-    router.push('/entrar')
-    return null
+  useEffect(() => {
+    const fetchCampeonatos = async () => {
+      try {
+        const response = await fetch('/api/campeonatos')
+        const data = await response.json()
+        
+        if (data.success) {
+          setCampeonatos(data.campeonatos || [])
+        }
+      } catch (error) {
+        console.error('Erro ao carregar campeonatos:', error)
+        toast.error('Erro ao carregar campeonatos')
+      } finally {
+        setLoadingCampeonatos(false)
+      }
+    }
+
+    if (status === 'authenticated') {
+      fetchCampeonatos()
+    }
+  }, [status])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    )
   }
+
+  const user = session?.user
+  if (!user) return null
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -79,8 +109,8 @@ export default function CriarBolaoPage() {
       newErrors.nome = 'Nome do bolão é obrigatório'
     }
 
-    if (!formData.descricao.trim()) {
-      newErrors.descricao = 'Descrição é obrigatória'
+    if (!formData.campeonatoId) {
+      newErrors.campeonatoId = 'Selecione um campeonato'
     }
 
     const maxParticipantes = parseInt(formData.maxParticipantes)
@@ -90,7 +120,6 @@ export default function CriarBolaoPage() {
       newErrors.maxParticipantes = 'Máximo 100 participantes'
     }
 
-    // Validar pontuação personalizada
     const pontosPlacarExato = parseInt(formData.pontosPlacarExato)
     if (isNaN(pontosPlacarExato) || pontosPlacarExato < 0 || pontosPlacarExato > 50) {
       newErrors.pontosPlacarExato = 'Entre 0 e 50 pontos'
@@ -101,9 +130,9 @@ export default function CriarBolaoPage() {
       newErrors.pontosResultadoCerto = 'Entre 0 e 25 pontos'
     }
 
-    const multiplicador = parseFloat(formData.multiplicadorFinalJogo)
-    if (isNaN(multiplicador) || multiplicador < 1 || multiplicador > 5) {
-      newErrors.multiplicadorFinalJogo = 'Entre 1.0 e 5.0'
+    const pontosGolsExatos = parseInt(formData.pontosGolsExatos)
+    if (isNaN(pontosGolsExatos) || pontosGolsExatos < 0 || pontosGolsExatos > 10) {
+      newErrors.pontosGolsExatos = 'Entre 0 e 10 pontos'
     }
 
     setErrors(newErrors)
@@ -113,90 +142,86 @@ export default function CriarBolaoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) return
+    if (!validateForm()) {
+      toast.error('Preencha todos os campos obrigatórios')
+      return
+    }
 
     setLoading(true)
 
     try {
-      // Construir objeto de premiação completo
-      let premios: {
-        geral?: {
-          primeiro: string
-          segundo?: string
-          terceiro?: string
-        }
-        fases?: {
-          primeiroTurno?: string
-          segundoTurno?: string
-          faseGrupos?: string
-          mataMata?: string
-        }
-      } | undefined = undefined
-      
-      if (formData.premio1.trim() || formData.premioPrimeiraTurno.trim() || formData.premioFaseGrupos.trim()) {
-        premios = {
-          geral: {
-            primeiro: formData.premio1 || '',
-            segundo: formData.premio2 || '',
-            terceiro: formData.premio3 || ''
+      const response = await fetch('/api/bolao/criar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: formData.nome,
+          descricao: formData.descricao,
+          campeonatoId: formData.campeonatoId,
+          maxParticipantes: parseInt(formData.maxParticipantes),
+          adminId: user.id,
+          
+          premiacao: {
+            porTurno: formData.tipoPremiacaoTurno,
+            porGeral: formData.tipoPremiacaoGeral,
+            turno1: formData.premioTurno1 || null,
+            turno2: formData.premioTurno2 || null,
+            geral1: formData.premioGeral1 || null,
+            geral2: formData.premioGeral2 || null,
+            geral3: formData.premioGeral3 || null,
           },
-          fases: {
-            primeiroTurno: formData.premioPrimeiraTurno || '',
-            segundoTurno: formData.premioSegundoTurno || '',
-            faseGrupos: formData.premioFaseGrupos || '',
-            mataMata: formData.premioMataMataTurno || ''
-          }
-        }
-      }
-
-      // Configurações avançadas de pontuação
-      const configuracoesPontuacao = {
-        placarExato: parseInt(formData.pontosPlacarExato),
-        resultadoCerto: parseInt(formData.pontosResultadoCerto),
-        golsExatos: parseInt(formData.pontosGolsExatos),
-        multiplicadorFinal: parseFloat(formData.multiplicadorFinalJogo),
-        bonusSequencia: parseInt(formData.bonusSequencia),
-        permitePalpiteTardio: formData.permitirPalpiteTardio
-      }
-
-      const novoId = await criarBolao({
-        nome: formData.nome,
-        descricao: formData.descricao,
-        maxParticipantes: parseInt(formData.maxParticipantes),
-        premios,
-        configuracoesPontuacao
-      }, {
-        id: user!.id,
-        nome: user!.name,
-        avatar: user!.avatar
+          
+          modalidade: {
+            faseGrupos: formData.modalidadeFaseGrupos,
+            mataMata: formData.modalidadeMataMata,
+          },
+          
+          configuracoesPontuacao: {
+            placarExato: parseInt(formData.pontosPlacarExato),
+            resultadoCerto: parseInt(formData.pontosResultadoCerto),
+            golsExatos: parseInt(formData.pontosGolsExatos),
+          },
+        }),
       })
-      
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Erro ao criar bolão')
+      }
+
       toast.success('Bolão criado com sucesso!', {
-        description: 'Agora você pode convidar seus amigos'
+        description: `Agora cadastre os jogos do ${formData.nome}`
       })
+
+      router.push(`/bolao/${data.bolao.id}/jogos`)
       
-      // Redirecionar para o bolão criado
-      setTimeout(() => {
-        router.push(`/bolao/${novoId}`)
-      }, 1000)
-    } catch {
-      setErrors({ general: 'Erro ao criar bolão. Tente novamente.' })
-      toast.error('Erro ao criar bolão', {
-        description: 'Tente novamente em alguns instantes'
-      })
+    } catch (error) {
+      console.error('Erro ao criar bolão:', error)
+      setErrors({ general: error instanceof Error ? error.message : 'Erro ao criar bolão. Tente novamente.' })
+      toast.error('Erro ao criar bolão')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target
     
-    // Limpar erro do campo quando o usuário começar a digitar
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }))
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -205,9 +230,10 @@ export default function CriarBolaoPage() {
     }
   }
 
+  const campeonatoSelecionado = campeonatos.find(c => c.id === formData.campeonatoId)
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="bg-card/80 backdrop-blur-sm shadow-sm border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
@@ -228,46 +254,26 @@ export default function CriarBolaoPage() {
         </div>
       </header>
 
-      {/* Breadcrumbs */}
-      <div className="bg-muted/30 border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <BreadcrumbCard>
-            <ActionBreadcrumbs action="criar-bolao" />
-          </BreadcrumbCard>
-        </div>
-      </div>
-
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        {/* Progress Indicator */}
-        <div className="mb-8">
-          <FormProgress 
-            totalSteps={8}
-            currentStep={calculateFormProgress()}
-            stepTitles={["Informações", "Premiação", "Avançado"]}
-            className="bg-card p-6 rounded-xl shadow-lg border border-border"
-          />
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Informações Básicas */}
-          <Card>
+      <main className="container mx-auto px-4 py-8 max-w-3xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Card className="border-border">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <Trophy className="h-5 w-5 text-primary" />
                 Informações Básicas
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-muted-foreground">
                 Configure as informações principais do seu bolão
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome do Bolão *</Label>
+                <Label htmlFor="nome" className="text-foreground font-medium">Nome do Bolão *</Label>
                 <Input
                   id="nome"
                   name="nome"
                   type="text"
-                  placeholder="Ex: Copa do Mundo 2024 - Família Silva"
+                  placeholder="Ex: Brasileirão 2025 - Galera do Trabalho"
                   value={formData.nome}
                   onChange={handleChange}
                   required
@@ -275,132 +281,81 @@ export default function CriarBolaoPage() {
                   maxLength={100}
                 />
                 {errors.nome && (
-                  <p className="text-sm text-red-600">{errors.nome}</p>
+                  <p className="text-sm text-destructive">{errors.nome}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="descricao">Descrição *</Label>
-                <Input
+                <Label htmlFor="descricao" className="text-foreground font-medium">Descrição (Opcional)</Label>
+                <Textarea
                   id="descricao"
                   name="descricao"
-                  type="text"
-                  placeholder="Ex: Bolão da família para os jogos da copa"
+                  placeholder="Ex: Bolão dos amigos do escritório. Boa sorte!"
                   value={formData.descricao}
                   onChange={handleChange}
-                  required
                   disabled={loading}
                   maxLength={200}
+                  rows={3}
                 />
-                {errors.descricao && (
-                  <p className="text-sm text-red-600">{errors.descricao}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="campeonatoId" className="text-foreground font-medium flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Campeonato *
+                </Label>
+                <select
+                  id="campeonatoId"
+                  name="campeonatoId"
+                  value={formData.campeonatoId}
+                  onChange={handleChange}
+                  disabled={loading || loadingCampeonatos}
+                  required
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">
+                    {loadingCampeonatos ? 'Carregando campeonatos...' : 'Selecione um campeonato'}
+                  </option>
+                  {campeonatos.map((campeonato) => (
+                    <option key={campeonato.id} value={campeonato.id}>
+                      {campeonato.nome} - {campeonato.pais} ({campeonato.participantes?.length || 0} times)
+                    </option>
+                  ))}
+                </select>
+                {errors.campeonatoId && (
+                  <p className="text-sm text-destructive">{errors.campeonatoId}</p>
+                )}
+                {campeonatoSelecionado && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    ✓ {campeonatoSelecionado.participantes?.length || 0} times disponíveis para cadastro de jogos
+                  </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="maxParticipantes">Máximo de Participantes *</Label>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gray-400" />
-                  <Input
-                    id="maxParticipantes"
-                    name="maxParticipantes"
-                    type="number"
-                    min="2"
-                    max="100"
-                    value={formData.maxParticipantes}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                    className="w-24"
-                  />
-                  <span className="text-sm text-gray-600">pessoas</span>
-                </div>
-                {errors.maxParticipantes && (
-                  <p className="text-sm text-red-600">{errors.maxParticipantes}</p>
-                )}
-                <p className="text-xs text-gray-500">
-                  Entre 2 e 100 participantes
-                </p>
-              </div>
+              <ParticipantSelector
+                value={formData.maxParticipantes}
+                onChange={(value) => setFormData(prev => ({ ...prev, maxParticipantes: value }))}
+                disabled={loading}
+                error={errors.maxParticipantes}
+              />
             </CardContent>
           </Card>
 
-          {/* Premiação (Opcional) */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5 text-yellow-600" />
-                Premiação (Opcional)
-              </CardTitle>
-              <CardDescription>
-                Configure os prêmios para os melhores colocados
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="premio1">🥇 1º Lugar</Label>
-                <Input
-                  id="premio1"
-                  name="premio1"
-                  type="text"
-                  placeholder="Ex: R$ 100, Troféu, Jantar..."
-                  value={formData.premio1}
-                  onChange={handleChange}
-                  disabled={loading}
-                  maxLength={100}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="premio2">🥈 2º Lugar</Label>
-                <Input
-                  id="premio2"
-                  name="premio2"
-                  type="text"
-                  placeholder="Ex: R$ 50, Medalha..."
-                  value={formData.premio2}
-                  onChange={handleChange}
-                  disabled={loading}
-                  maxLength={100}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="premio3">🥉 3º Lugar</Label>
-                <Input
-                  id="premio3"
-                  name="premio3"
-                  type="text"
-                  placeholder="Ex: R$ 20, Certificado..."
-                  value={formData.premio3}
-                  onChange={handleChange}
-                  disabled={loading}
-                  maxLength={100}
-                />
-              </div>
-
-              <p className="text-xs text-gray-500">
-                A premiação é opcional e serve apenas para motivar os participantes
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Premiação por Fases (Avançado) */}
-          <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50/30 to-purple-50/30">
+          <Card className="border-border">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Medal className="h-5 w-5 text-blue-600" />
-                  <CardTitle>Premiação por Fases (Avançado)</CardTitle>
+                  <Gift className="h-5 w-5 text-yellow-600 dark:text-yellow-500" />
+                  <CardTitle className="text-foreground">Premiação</CardTitle>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowPremiacaoFases(!showPremiacaoFases)}
+                  onClick={() => setShowPremiacao(!showPremiacao)}
                   disabled={loading}
                 >
-                  {showPremiacaoFases ? (
+                  {showPremiacao ? (
                     <>
                       <ChevronUp className="h-4 w-4 mr-1" />
                       Ocultar
@@ -413,93 +368,213 @@ export default function CriarBolaoPage() {
                   )}
                 </Button>
               </div>
-              <CardDescription>
-                Configure prêmios específicos para diferentes fases do campeonato
+              <CardDescription className="text-muted-foreground">
+                Configure os prêmios por turno ou por classificação geral
               </CardDescription>
             </CardHeader>
-            {showPremiacaoFases && (
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
+            {showPremiacao && (
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label className="text-foreground font-medium">Tipo de Premiação</Label>
                   <div className="space-y-2">
-                    <Label htmlFor="premioPrimeiraTurno">🏆 Campeão 1º Turno</Label>
-                    <Input
-                      id="premioPrimeiraTurno"
-                      name="premioPrimeiraTurno"
-                      type="text"
-                      placeholder="Ex: R$ 50, Medalha..."
-                      value={formData.premioPrimeiraTurno}
-                      onChange={handleChange}
-                      disabled={loading}
-                      maxLength={100}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="premioSegundoTurno">🏆 Campeão 2º Turno</Label>
-                    <Input
-                      id="premioSegundoTurno"
-                      name="premioSegundoTurno"
-                      type="text"
-                      placeholder="Ex: R$ 50, Medalha..."
-                      value={formData.premioSegundoTurno}
-                      onChange={handleChange}
-                      disabled={loading}
-                      maxLength={100}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="premioFaseGrupos">⚽ Melhor na Fase de Grupos</Label>
-                    <Input
-                      id="premioFaseGrupos"
-                      name="premioFaseGrupos"
-                      type="text"
-                      placeholder="Ex: R$ 30, Troféu..."
-                      value={formData.premioFaseGrupos}
-                      onChange={handleChange}
-                      disabled={loading}
-                      maxLength={100}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="premioMataMataTurno">🎯 Melhor no Mata-Mata</Label>
-                    <Input
-                      id="premioMataMataTurno"
-                      name="premioMataMataTurno"
-                      type="text"
-                      placeholder="Ex: R$ 30, Certificado..."
-                      value={formData.premioMataMataTurno}
-                      onChange={handleChange}
-                      disabled={loading}
-                      maxLength={100}
-                    />
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="tipoPremiacaoTurno"
+                        name="tipoPremiacaoTurno"
+                        checked={formData.tipoPremiacaoTurno}
+                        onChange={handleChange}
+                        disabled={loading}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <label htmlFor="tipoPremiacaoTurno" className="text-sm text-foreground">
+                        Premiação por Turno (1º e 2º turno)
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="tipoPremiacaoGeral"
+                        name="tipoPremiacaoGeral"
+                        checked={formData.tipoPremiacaoGeral}
+                        onChange={handleChange}
+                        disabled={loading}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <label htmlFor="tipoPremiacaoGeral" className="text-sm text-foreground">
+                        Premiação Geral (Classificação final)
+                      </label>
+                    </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-500">
-                  Premiações por fases permitem mais engajamento durante todo o campeonato
-                </p>
+                {formData.tipoPremiacaoTurno && (
+                  <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+                    <h4 className="font-medium text-foreground text-sm">🏆 Premiação por Turno</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="premioTurno1" className="text-foreground text-sm">1º Turno</Label>
+                        <Input
+                          id="premioTurno1"
+                          name="premioTurno1"
+                          type="text"
+                          placeholder="Ex: R$ 50"
+                          value={formData.premioTurno1}
+                          onChange={handleChange}
+                          disabled={loading}
+                          maxLength={100}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="premioTurno2" className="text-foreground text-sm">2º Turno</Label>
+                        <Input
+                          id="premioTurno2"
+                          name="premioTurno2"
+                          type="text"
+                          placeholder="Ex: R$ 50"
+                          value={formData.premioTurno2}
+                          onChange={handleChange}
+                          disabled={loading}
+                          maxLength={100}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {formData.tipoPremiacaoGeral && (
+                  <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+                    <h4 className="font-medium text-foreground text-sm">🎖️ Premiação Geral</h4>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="premioGeral1" className="text-foreground text-sm">🥇 1º Lugar</Label>
+                        <Input
+                          id="premioGeral1"
+                          name="premioGeral1"
+                          type="text"
+                          placeholder="Ex: R$ 200, Troféu..."
+                          value={formData.premioGeral1}
+                          onChange={handleChange}
+                          disabled={loading}
+                          maxLength={100}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="premioGeral2" className="text-foreground text-sm">🥈 2º Lugar</Label>
+                        <Input
+                          id="premioGeral2"
+                          name="premioGeral2"
+                          type="text"
+                          placeholder="Ex: R$ 100, Medalha..."
+                          value={formData.premioGeral2}
+                          onChange={handleChange}
+                          disabled={loading}
+                          maxLength={100}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="premioGeral3" className="text-foreground text-sm">🥉 3º Lugar</Label>
+                        <Input
+                          id="premioGeral3"
+                          name="premioGeral3"
+                          type="text"
+                          placeholder="Ex: R$ 50, Certificado..."
+                          value={formData.premioGeral3}
+                          onChange={handleChange}
+                          disabled={loading}
+                          maxLength={100}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             )}
           </Card>
 
-          {/* Regras de Pontuação (Avançado) */}
-          <Card className="border-2 border-green-100 bg-gradient-to-br from-green-50/30 to-blue-50/30">
+          <Card className="border-border">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-green-600" />
-                  <CardTitle>Regras de Pontuação (Avançado)</CardTitle>
+                  <Zap className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-foreground">Modalidade</CardTitle>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  onClick={() => setShowModalidade(!showModalidade)}
                   disabled={loading}
                 >
-                  {showAdvanced ? (
+                  {showModalidade ? (
+                    <>
+                      <ChevronUp className="h-4 w-4 mr-1" />
+                      Ocultar
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4 mr-1" />
+                      Configurar
+                    </>
+                  )}
+                </Button>
+              </div>
+              <CardDescription className="text-muted-foreground">
+                Para copas e torneios com fases especiais
+              </CardDescription>
+            </CardHeader>
+            {showModalidade && (
+              <CardContent className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="modalidadeFaseGrupos"
+                    name="modalidadeFaseGrupos"
+                    checked={formData.modalidadeFaseGrupos}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="modalidadeFaseGrupos" className="text-sm text-foreground">
+                    Fase de Grupos
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="modalidadeMataMata"
+                    name="modalidadeMataMata"
+                    checked={formData.modalidadeMataMata}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="modalidadeMataMata" className="text-sm text-foreground">
+                    Mata-Mata (Oitavas, Quartas, Semi, Final)
+                  </label>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  💡 Essas opções ajudam a organizar melhor os jogos de copas e torneios eliminatórios
+                </p>
+              </CardContent>
+            )}
+          </Card>
+
+          <Card className="border-border">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-foreground">Pontuação Personalizada</CardTitle>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPontuacao(!showPontuacao)}
+                  disabled={loading}
+                >
+                  {showPontuacao ? (
                     <>
                       <ChevronUp className="h-4 w-4 mr-1" />
                       Ocultar
@@ -512,19 +587,16 @@ export default function CriarBolaoPage() {
                   )}
                 </Button>
               </div>
-              <CardDescription>
-                Personalize o sistema de pontuação do seu bolão
+              <CardDescription className="text-muted-foreground">
+                Defina quantos pontos cada tipo de acerto vale (Padrão: 5/3/1)
               </CardDescription>
             </CardHeader>
-            {showAdvanced && (
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-3 gap-4">
+            {showPontuacao && (
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="pontosPlacarExato" className="flex items-center gap-2">
+                    <Label htmlFor="pontosPlacarExato" className="text-foreground text-sm">
                       🎯 Placar Exato
-                      {errors.pontosPlacarExato && (
-                        <span className="text-xs text-red-600">*</span>
-                      )}
                     </Label>
                     <Input
                       id="pontosPlacarExato"
@@ -538,16 +610,13 @@ export default function CriarBolaoPage() {
                       className="text-center font-bold"
                     />
                     {errors.pontosPlacarExato && (
-                      <p className="text-xs text-red-600">{errors.pontosPlacarExato}</p>
+                      <p className="text-xs text-destructive">{errors.pontosPlacarExato}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pontosResultadoCerto" className="flex items-center gap-2">
+                    <Label htmlFor="pontosResultadoCerto" className="text-foreground text-sm">
                       ⚽ Resultado Certo
-                      {errors.pontosResultadoCerto && (
-                        <span className="text-xs text-red-600">*</span>
-                      )}
                     </Label>
                     <Input
                       id="pontosResultadoCerto"
@@ -561,12 +630,14 @@ export default function CriarBolaoPage() {
                       className="text-center font-bold"
                     />
                     {errors.pontosResultadoCerto && (
-                      <p className="text-xs text-red-600">{errors.pontosResultadoCerto}</p>
+                      <p className="text-xs text-destructive">{errors.pontosResultadoCerto}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pontosGolsExatos">🥅 Gols Exatos (Bônus)</Label>
+                    <Label htmlFor="pontosGolsExatos" className="text-foreground text-sm">
+                      🥅 Gols Exatos
+                    </Label>
                     <Input
                       id="pontosGolsExatos"
                       name="pontosGolsExatos"
@@ -578,93 +649,36 @@ export default function CriarBolaoPage() {
                       disabled={loading}
                       className="text-center font-bold"
                     />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="multiplicadorFinalJogo" className="flex items-center gap-2">
-                      🔥 Multiplicador Final/Decisivo
-                      {errors.multiplicadorFinalJogo && (
-                        <span className="text-xs text-red-600">*</span>
-                      )}
-                    </Label>
-                    <Input
-                      id="multiplicadorFinalJogo"
-                      name="multiplicadorFinalJogo"
-                      type="number"
-                      min="1"
-                      max="5"
-                      step="0.1"
-                      value={formData.multiplicadorFinalJogo}
-                      onChange={handleChange}
-                      disabled={loading}
-                      className="text-center font-bold"
-                    />
-                    {errors.multiplicadorFinalJogo && (
-                      <p className="text-xs text-red-600">{errors.multiplicadorFinalJogo}</p>
+                    {errors.pontosGolsExatos && (
+                      <p className="text-xs text-destructive">{errors.pontosGolsExatos}</p>
                     )}
-                    <p className="text-xs text-gray-500">
-                      Ex: 2x pontos em finais
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="bonusSequencia">🎊 Bônus Sequência</Label>
-                    <Input
-                      id="bonusSequencia"
-                      name="bonusSequencia"
-                      type="number"
-                      min="0"
-                      max="20"
-                      value={formData.bonusSequencia}
-                      onChange={handleChange}
-                      disabled={loading}
-                      className="text-center font-bold"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Pontos extra por acertos seguidos
-                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      id="permitirPalpiteTardio"
-                      name="permitirPalpiteTardio"
-                      type="checkbox"
-                      checked={formData.permitirPalpiteTardio}
-                      onChange={handleChange}
-                      disabled={loading}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <Label htmlFor="permitirPalpiteTardio" className="text-sm">
-                      ⏰ Permitir palpites até o início do jogo (não recomendado)
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">💡 Exemplos de Configuração:</h4>
-                  <div className="text-sm text-accent space-y-1">
-                    <p><strong>Conservador:</strong> 10 / 5 / 1 / 1x / 0</p>
-                    <p><strong>Moderado:</strong> 15 / 7 / 2 / 1.5x / 3</p>
-                    <p><strong>Agressivo:</strong> 20 / 10 / 3 / 2x / 5</p>
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-foreground mb-2 text-sm">💡 Sugestões:</h4>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p><strong>Padrão:</strong> 5 / 3 / 1 (recomendado)</p>
+                    <p><strong>Moderado:</strong> 10 / 5 / 2</p>
+                    <p><strong>Agressivo:</strong> 15 / 7 / 3</p>
                   </div>
                 </div>
               </CardContent>
             )}
           </Card>
 
-          {/* Erro Geral */}
           {errors.general && (
             <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
               {errors.general}
             </div>
           )}
 
-          {/* Botões */}
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+            <p className="text-sm text-foreground">
+              <strong>ℹ️ Próximo passo:</strong> Após criar o bolão, você será direcionado para cadastrar os jogos do campeonato selecionado.
+            </p>
+          </div>
+
           <div className="flex gap-4">
             <Button
               type="button"
@@ -677,8 +691,8 @@ export default function CriarBolaoPage() {
             </Button>
             <Button
               type="submit"
-              className="flex-1"
-              disabled={loading}
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+              disabled={loading || loadingCampeonatos}
             >
               {loading ? (
                 <>
@@ -687,27 +701,13 @@ export default function CriarBolaoPage() {
                 </>
               ) : (
                 <>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Trophy className="mr-2 h-4 w-4" />
                   Criar Bolão
                 </>
               )}
             </Button>
           </div>
         </form>
-
-        {/* Preview do Código */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="text-sm">ℹ️ Como Funcionará</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground space-y-2">
-            <p>1. Após criar o bolão, você receberá um <strong>código único</strong></p>
-            <p>2. Compartilhe este código com seus amigos</p>
-            <p>3. Eles poderão entrar no bolão usando este código</p>
-            <p>4. Você será o <strong>administrador</strong> do bolão</p>
-            <p>5. Todos poderão fazer palpites e ver o ranking em tempo real</p>
-          </CardContent>
-        </Card>
       </main>
     </div>
   )

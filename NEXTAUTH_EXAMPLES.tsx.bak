@@ -1,0 +1,326 @@
+/**
+ * EXEMPLO DE USO DO NEXTAUTH.JS V5
+ * 
+ * Este arquivo demonstra como usar autenticação em diferentes contextos:
+ * - Server Components
+ * - Client Components
+ * - API Routes
+ * - Middleware
+ */
+
+// ==========================================
+// 1. SERVER COMPONENT (App Router)
+// ==========================================
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+
+export default async function ProfilePage() {
+  const session = await auth()
+  
+  // Proteger rota
+  if (!session) {
+    redirect('/entrar')
+  }
+  
+  return (
+    <div>
+      <h1>Bem-vindo, {session.user?.name}!</h1>
+      <p>Email: {session.user?.email}</p>
+    </div>
+  )
+}
+
+// ==========================================
+// 2. CLIENT COMPONENT
+// ==========================================
+'use client'
+
+import { useSession, signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+
+export function ClientProfileComponent() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  
+  // Verificar estado de loading
+  if (status === 'loading') {
+    return <div>Carregando...</div>
+  }
+  
+  // Proteger componente
+  if (status === 'unauthenticated') {
+    router.push('/entrar')
+    return null
+  }
+  
+  return (
+    <div>
+      <h1>Olá, {session?.user?.name}!</h1>
+      <button onClick={() => signOut({ callbackUrl: '/entrar' })}>
+        Sair
+      </button>
+    </div>
+  )
+}
+
+// ==========================================
+// 3. API ROUTE (Server-Side)
+// ==========================================
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
+
+export async function GET(request: NextRequest) {
+  const session = await auth()
+  
+  if (!session) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+  
+  // Usar dados da sessão
+  const userId = session.user?.id
+  
+  // Buscar dados do usuário
+  const userData = await fetchUserData(userId)
+  
+  return NextResponse.json(userData)
+}
+
+export async function POST(request: NextRequest) {
+  const session = await auth()
+  
+  if (!session) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+  
+  const body = await request.json()
+  
+  // Processar dados
+  const result = await createResource(session.user?.id, body)
+  
+  return NextResponse.json(result)
+}
+
+// ==========================================
+// 4. MIDDLEWARE (Proteção Global de Rotas)
+// ==========================================
+// Arquivo: middleware.ts (na raiz do projeto)
+
+import { auth } from '@/lib/auth'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  const session = await auth()
+  
+  // Rotas públicas
+  const publicPaths = ['/entrar', '/cadastrar', '/']
+  const isPublicPath = publicPaths.some(path => 
+    request.nextUrl.pathname.startsWith(path)
+  )
+  
+  // Se não estiver autenticado e tentar acessar rota protegida
+  if (!session && !isPublicPath) {
+    return NextResponse.redirect(new URL('/entrar', request.url))
+  }
+  
+  // Se estiver autenticado e tentar acessar login
+  if (session && request.nextUrl.pathname === '/entrar') {
+    return NextResponse.redirect(new URL('/meus-boloes', request.url))
+  }
+  
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\..*|api).*)',
+  ],
+}
+
+// ==========================================
+// 5. HOOKS PERSONALIZADOS
+// ==========================================
+
+// Hook para verificar se está autenticado
+'use client'
+import { useSession } from 'next-auth/react'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+export function useRequireAuth() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/entrar')
+    }
+  }, [status, router])
+  
+  return { session, isLoading: status === 'loading' }
+}
+
+// Uso:
+function ProtectedComponent() {
+  const { session, isLoading } = useRequireAuth()
+  
+  if (isLoading) return <div>Carregando...</div>
+  if (!session) return null
+  
+  return <div>Conteúdo protegido</div>
+}
+
+// ==========================================
+// 6. CHAMAR API COM AUTENTICAÇÃO
+// ==========================================
+'use client'
+
+import { useSession } from 'next-auth/react'
+
+export function DataFetcherComponent() {
+  const { data: session } = useSession()
+  
+  async function fetchProtectedData() {
+    const response = await fetch('/api/protected-route', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    
+    if (!response.ok) {
+      throw new Error('Falha ao buscar dados')
+    }
+    
+    return response.json()
+  }
+  
+  // NextAuth automaticamente adiciona cookies de sessão
+  // Não precisa enviar token manualmente!
+}
+
+// ==========================================
+// 7. MONGODB - BUSCAR USUÁRIO
+// ==========================================
+import { getDatabase } from '@/lib/mongodb'
+
+async function getUserFromDB(userId: string) {
+  const db = await getDatabase()
+  
+  const user = await db.collection('users').findOne({
+    _id: new ObjectId(userId)
+  })
+  
+  return user
+}
+
+// ==========================================
+// 8. ATUALIZAR PERFIL
+// ==========================================
+// API Route: app/api/usuario/perfil/route.ts
+
+import { auth } from '@/lib/auth'
+import { getDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
+
+export async function PUT(request: NextRequest) {
+  const session = await auth()
+  
+  if (!session) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+  
+  const body = await request.json()
+  const { name } = body
+  
+  const db = await getDatabase()
+  
+  await db.collection('users').updateOne(
+    { _id: new ObjectId(session.user?.id) },
+    { $set: { name, updatedAt: new Date() } }
+  )
+  
+  return NextResponse.json({ success: true })
+}
+
+// ==========================================
+// 9. LOGOUT
+// ==========================================
+'use client'
+
+import { signOut } from 'next-auth/react'
+
+function LogoutButton() {
+  return (
+    <button onClick={() => signOut({ callbackUrl: '/entrar' })}>
+      Sair
+    </button>
+  )
+}
+
+// ==========================================
+// 10. VERIFICAR ROLE/PERMISSÕES
+// ==========================================
+
+// Adicionar role no callback da sessão (lib/auth.ts):
+/*
+callbacks: {
+  async session({ session, token }) {
+    if (token && session.user) {
+      session.user.id = token.sub as string
+      session.user.role = token.role as string // adicionar role
+    }
+    return session
+  },
+  async jwt({ token, user }) {
+    if (user) {
+      token.role = user.role // vem do banco
+    }
+    return token
+  }
+}
+*/
+
+// Usar em componente:
+function AdminOnlyComponent() {
+  const { data: session } = useSession()
+  
+  if (session?.user?.role !== 'admin') {
+    return <div>Acesso negado</div>
+  }
+  
+  return <div>Área administrativa</div>
+}
+
+// ==========================================
+// RESUMO DE MÉTODOS ÚTEIS
+// ==========================================
+
+/*
+SERVER SIDE:
+  - await auth() → Pega sessão em Server Component ou API Route
+  - redirect('/entrar') → Redireciona se não autenticado
+
+CLIENT SIDE:
+  - useSession() → Hook para pegar sessão
+  - signIn('google') → Login com provedor
+  - signIn('credentials', { email, password }) → Login com credenciais
+  - signOut({ callbackUrl: '/entrar' }) → Logout
+
+STATUS:
+  - loading → Carregando sessão
+  - authenticated → Usuário logado
+  - unauthenticated → Usuário não logado
+
+SESSION OBJECT:
+  - session.user.id → ID do usuário
+  - session.user.name → Nome
+  - session.user.email → Email
+  - session.user.image → Avatar (Google OAuth)
+*/

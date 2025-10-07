@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Download, Share, Calendar, Filter } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
+import { useSession } from 'next-auth/react'
 import { AdvancedStats } from '@/components/ui/advanced-stats'
 import { BreadcrumbCard } from '@/components/ui/breadcrumbs'
 import { useEstatisticas } from '@/lib/hooks/useEstatisticas'
@@ -15,21 +15,30 @@ import { TrendingUp, Trophy, Target, BarChart3 } from "lucide-react"
 
 export default function EstatisticasPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { data: session, status } = useSession()
   const [timeRange, setTimeRange] = useState<'all' | 'month' | 'quarter'>('all')
   
   const { estatisticas, loading, error } = useEstatisticas(timeRange)
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (status === 'unauthenticated') {
       router.push('/entrar')
-      return
     }
-  }, [isAuthenticated, router])
+  }, [status, router])
 
-  if (!isAuthenticated || !user) {
-    return null
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    )
   }
+
+  const user = session?.user
+  if (!user) return null
 
   if (loading) {
     return (

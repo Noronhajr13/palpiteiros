@@ -5,6 +5,8 @@ import { AlertTriangle, Trash2, X } from 'lucide-react'
 
 interface Jogo {
   id: string
+  timeAId?: string
+  timeBId?: string
   timeA: string
   timeB: string
   data: string

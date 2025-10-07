@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getDatabase } from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,18 +12,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const db = await getDatabase()
+
     // Buscar usuário no banco
-    const user = await prisma.user.findFirst({
-      where: {
-        email: email.toLowerCase().trim(),
-        password // Em produção, usar hash da senha
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        avatar: true
-      }
+    const user = await db.collection('users').findOne({
+      email: email.toLowerCase().trim(),
+      password // Em produção, usar hash da senha
     })
 
     if (!user) {
@@ -35,7 +29,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      user
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        avatar: user.image || null
+      }
     })
 
   } catch (error) {

@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Trophy, Calendar, Target, TrendingUp, ArrowLeft, Share2 } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
+import { Trophy, Calendar, Target, TrendingUp, ArrowLeft, Share2, ListChecks } from "lucide-react"
+import { useSession } from 'next-auth/react'
 import { useBolaoStoreDB as useBolaoStore } from '@/lib/stores/useBolaoStoreAPI'
 
 interface BolaoPageProps {
@@ -15,34 +15,38 @@ interface BolaoPageProps {
 
 export default function BolaoPage({ params }: BolaoPageProps) {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { data: session, status } = useSession()
   const { selecionarBolao, bolaoAtual } = useBolaoStore()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (status === 'unauthenticated') {
       router.push('/entrar')
       return
     }
 
-    const loadData = async () => {
-      setLoading(true)
-      const { id } = await params
-      selecionarBolao(id)
-      await new Promise(resolve => setTimeout(resolve, 600))
-      setLoading(false)
+    if (status === 'authenticated') {
+      const loadData = async () => {
+        setLoading(true)
+        const { id } = await params
+        selecionarBolao(id)
+        await new Promise(resolve => setTimeout(resolve, 600))
+        setLoading(false)
+      }
+      
+      loadData()
     }
-    
-    loadData()
-  }, [isAuthenticated, params, router, selecionarBolao])
+  }, [status, params, router, selecionarBolao])
 
-  if (!isAuthenticated || !user || loading || !bolaoAtual) {
+  if (status === 'loading' || loading || !bolaoAtual) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div>Carregando...</div>
       </div>
     )
   }
+
+  const user = session?.user
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +97,16 @@ export default function BolaoPage({ params }: BolaoPageProps) {
               </Link>
             </Button>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button variant="outline" className="h-20 border-border hover:bg-accent/20" asChild>
+                <Link href={`/bolao/${bolaoAtual.id}/meus-palpites`}>
+                  <div className="text-center">
+                    <ListChecks className="h-8 w-8 mx-auto mb-2 text-primary" />
+                    <div className="font-bold text-foreground">Meus Palpites</div>
+                  </div>
+                </Link>
+              </Button>
+
               <Button variant="outline" className="h-20 border-border hover:bg-accent/20" asChild>
                 <Link href={`/bolao/${bolaoAtual.id}/ranking`}>
                   <div className="text-center">
@@ -102,7 +115,9 @@ export default function BolaoPage({ params }: BolaoPageProps) {
                   </div>
                 </Link>
               </Button>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button variant="outline" className="h-20 border-border hover:bg-accent/20" asChild>
                 <Link href={`/bolao/${bolaoAtual.id}/jogos`}>
                   <div className="text-center">

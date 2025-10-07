@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { getDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 export async function GET(
   request: NextRequest,
@@ -10,88 +9,145 @@ export async function GET(
   try {
     const { id } = await params
 
-    // Buscar bolão com todos os dados relacionados
-    const bolao = await prisma.bolao.findUnique({
-      where: { id },
-      include: {
-        admin: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true
-          }
-        },
-        participantes: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true
-              }
-            }
-          },
-          orderBy: [
-            { posicao: 'asc' },
-            { pontos: 'desc' }
-          ]
-        },
-        jogos: {
-          orderBy: [
-            { rodada: 'asc' },
-            { data: 'asc' }
-          ]
-        },
-        palpites: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true
-              }
-            },
-            jogo: {
-              select: {
-                id: true,
-                timeA: true,
-                timeB: true,
-                rodada: true
-              }
-            }
-          }
-        }
-      }
-    })
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
+    }
+
+    const db = await getDatabase()
+    const bolaoId = new ObjectId(id)
+
+    // Buscar bolão
+    const bolao = await db.collection('boloes').findOne({ _id: bolaoId })
 
     if (!bolao) {
       return NextResponse.json({ error: 'Bolão não encontrado' }, { status: 404 })
     }
 
+    // Buscar admin
+    const admin = await db.collection('users').findOne(
+      { _id: new ObjectId(bolao.adminId) },
+      { projection: { _id: 1, name: 1, avatar: 1 } }
+    )
+
+    // Buscar participantes com lookup para users
+    const participantes = await db.collection('participantes').aggregate([
+      { $match: { bolaoId: id, status: 'aprovado' } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: '$user' },
+      { $sort: { posicao: 1, pontos: -1 } },
+      {
+        $project: {
+          id: { $toString: '$_id' },
+          userId: 1,
+          pontos: 1,
+          posicao: 1,
+          palpitesCorretos: 1,
+          totalPalpites: 1,
+          user: {
+            id: { $toString: '$user._id' },
+            name: '$user.name',
+            avatar: '$user.avatar'
+          }
+        }
+      }
+    ]).toArray()
+
+    // Buscar jogos
+    const jogos = await db.collection('jogos')
+      .find({ bolaoId: id })
+      .sort({ rodada: 1, data: 1 })
+      .toArray()
+
+    // Buscar palpites com lookup para users e jogos
+    const palpites = await db.collection('palpites').aggregate([
+      { $match: { bolaoId: id } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $lookup: {
+          from: 'jogos',
+          localField: 'jogoId',
+          foreignField: '_id',
+          as: 'jogo'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$jogo', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          id: { $toString: '$_id' },
+          jogoId: 1,
+          userId: 1,
+          placarA: 1,
+          placarB: 1,
+          user: {
+            id: { $toString: '$user._id' },
+            name: '$user.name'
+          },
+          jogo: {
+            id: { $toString: '$jogo._id' },
+            timeA: '$jogo.timeA',
+            timeB: '$jogo.timeB',
+            rodada: '$jogo.rodada'
+          }
+        }
+      }
+    ]).toArray()
+
     // Calcular estatísticas
-    const jogosFinalizados = bolao.jogos.filter(j => j.status === 'finalizado').length
-    const jogosAgendados = bolao.jogos.filter(j => j.status === 'agendado').length
-    const totalPalpites = bolao.palpites.length
-    const rodadaAtual = Math.max(...bolao.jogos.map(j => j.rodada), 0)
+    const jogosFinalizados = jogos.filter(j => j.status === 'finalizado').length
+    const jogosAgendados = jogos.filter(j => j.status === 'agendado').length
+    const totalPalpites = palpites.length
+    const rodadaAtual = jogos.length > 0 ? Math.max(...jogos.map(j => j.rodada)) : 0
 
     // Formatar resposta
     const response = {
-      ...bolao,
+      id: bolao._id.toString(),
+      nome: bolao.nome,
+      descricao: bolao.descricao,
+      adminId: bolao.adminId,
+      codigo: bolao.codigo,
+      privacidade: bolao.privacidade,
+      status: bolao.status,
+      modalidade: bolao.modalidade,
+      campeonatoId: bolao.campeonatoId,
+      premiacao: bolao.premiacao,
+      createdAt: bolao.createdAt,
+      updatedAt: bolao.updatedAt,
+      admin: admin ? {
+        id: admin._id.toString(),
+        name: admin.name,
+        avatar: admin.avatar
+      } : null,
       estatisticas: {
-        totalParticipantes: bolao.participantes.length,
+        totalParticipantes: participantes.length,
         jogosFinalizados,
         jogosAgendados,
-        totalJogos: bolao.jogos.length,
+        totalJogos: jogos.length,
         totalPalpites,
         rodadaAtual,
-        aproveitamentoMedio: bolao.participantes.length > 0
+        aproveitamentoMedio: participantes.length > 0
           ? Math.round(
-              bolao.participantes.reduce((acc, p) => 
+              participantes.reduce((acc, p) => 
                 acc + (p.totalPalpites > 0 ? (p.palpitesCorretos / p.totalPalpites) * 100 : 0), 0
-              ) / bolao.participantes.length
+              ) / participantes.length
             )
           : 0
       },
-      participantes: bolao.participantes.map(p => ({
+      participantes: participantes.map(p => ({
         id: p.id,
         userId: p.userId,
         nome: p.user.name,
@@ -103,7 +159,13 @@ export async function GET(
         aproveitamento: p.totalPalpites > 0 
           ? Math.round((p.palpitesCorretos / p.totalPalpites) * 100)
           : 0
-      }))
+      })),
+      jogos: jogos.map(j => ({
+        id: j._id.toString(),
+        ...j,
+        _id: undefined
+      })),
+      palpites
     }
 
     return NextResponse.json(response)

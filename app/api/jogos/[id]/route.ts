@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 // GET - Buscar jogo específico
 export async function GET(
@@ -8,15 +9,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    const db = await getDatabase()
     
-    const jogo = await prisma.jogo.findUnique({
-      where: { id },
-      include: {
-        bolao: {
-          select: { nome: true, codigo: true }
-        }
-      }
-    })
+    const jogo = await db.collection('jogos').findOne({ _id: new ObjectId(id) })
 
     if (!jogo) {
       return NextResponse.json(
@@ -25,7 +20,19 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ jogo })
+    // Buscar bolão
+    const bolao = await db.collection('boloes').findOne(
+      { _id: jogo.bolaoId },
+      { projection: { nome: 1, codigo: 1 } }
+    )
+
+    return NextResponse.json({ 
+      jogo: {
+        ...jogo,
+        id: jogo._id.toString(),
+        bolao: bolao ? { nome: bolao.nome, codigo: bolao.codigo } : null
+      }
+    })
   } catch (error) {
     console.error('Erro ao buscar jogo:', error)
     return NextResponse.json(
@@ -43,12 +50,12 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { timeA, timeB, data, rodada, status, placarA, placarB } = body
+    const { timeAId, timeBId, timeA, timeB, data, rodada, status, placarA, placarB } = body
 
-    // Validações
-    if (!timeA || !timeB) {
+    // Validações - aceitar tanto IDs quanto nomes
+    if ((!timeAId && !timeA) || (!timeBId && !timeB)) {
       return NextResponse.json(
-        { error: 'Times são obrigatórios' },
+        { error: 'Times são obrigatórios (IDs ou nomes)' },
         { status: 400 }
       )
     }
@@ -68,10 +75,10 @@ export async function PUT(
       )
     }
 
+    const db = await getDatabase()
+
     // Verificar se o jogo existe
-    const jogoExistente = await prisma.jogo.findUnique({
-      where: { id }
-    })
+    const jogoExistente = await db.collection('jogos').findOne({ _id: new ObjectId(id) })
 
     if (!jogoExistente) {
       return NextResponse.json(
@@ -81,18 +88,26 @@ export async function PUT(
     }
 
     // Atualizar o jogo
-    const jogoAtualizado = await prisma.jogo.update({
-      where: { id },
-      data: {
-        timeA,
-        timeB,
-        data: new Date(data),
-        rodada: parseInt(rodada),
-        status: status || 'agendado',
-        placarA: status === 'finalizado' ? parseInt(placarA) : null,
-        placarB: status === 'finalizado' ? parseInt(placarB) : null,
-      }
-    })
+    const updateData: Record<string, unknown> = {
+      data: new Date(data),
+      rodada: parseInt(rodada),
+      status: status || 'agendado',
+      placarA: status === 'finalizado' ? parseInt(placarA) : null,
+      placarB: status === 'finalizado' ? parseInt(placarB) : null,
+      updatedAt: new Date()
+    }
+
+    // Atualizar IDs e nomes dos times se fornecidos
+    if (timeAId) updateData.timeAId = timeAId
+    if (timeBId) updateData.timeBId = timeBId
+    if (timeA) updateData.timeA = timeA
+    if (timeB) updateData.timeB = timeB
+
+    const result = await db.collection('jogos').findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: updateData },
+      { returnDocument: 'after' }
+    )
 
     // Se o jogo foi finalizado, recalcular pontuação
     if (status === 'finalizado') {
@@ -101,7 +116,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ 
-      jogo: jogoAtualizado,
+      jogo: result,
       message: 'Jogo atualizado com sucesso!'
     })
   } catch (error) {
@@ -120,16 +135,10 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+    const db = await getDatabase()
     
     // Verificar se o jogo existe
-    const jogoExistente = await prisma.jogo.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: { palpites: true }
-        }
-      }
-    })
+    const jogoExistente = await db.collection('jogos').findOne({ _id: new ObjectId(id) })
 
     if (!jogoExistente) {
       return NextResponse.json(
@@ -139,20 +148,20 @@ export async function DELETE(
     }
 
     // Verificar se há palpites associados
-    if (jogoExistente._count.palpites > 0) {
+    const palpitesCount = await db.collection('palpites').countDocuments({ jogoId: id })
+
+    if (palpitesCount > 0) {
       return NextResponse.json(
         { 
           error: 'Não é possível excluir jogo que já possui palpites',
-          palpites: jogoExistente._count.palpites
+          palpites: palpitesCount
         },
         { status: 400 }
       )
     }
 
     // Excluir o jogo
-    await prisma.jogo.delete({
-      where: { id }
-    })
+    await db.collection('jogos').deleteOne({ _id: new ObjectId(id) })
 
     return NextResponse.json({ 
       message: 'Jogo excluído com sucesso!'

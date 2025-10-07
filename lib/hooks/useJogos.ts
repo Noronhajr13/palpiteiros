@@ -1,8 +1,10 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
 interface Jogo {
   id: string
+  timeAId?: string
+  timeBId?: string
   timeA: string
   timeB: string
   data: string
@@ -13,8 +15,10 @@ interface Jogo {
 }
 
 interface NovoJogo {
-  timeA: string
-  timeB: string
+  timeAId?: string
+  timeBId?: string
+  timeA?: string
+  timeB?: string
   data: string
   rodada: number
   status?: string
@@ -31,6 +35,7 @@ export function useJogos(bolaoId: string) {
   const carregarJogos = useCallback(async () => {
     if (!bolaoId) return
     
+    console.log('🎮 Carregando jogos para bolão:', bolaoId)
     setLoading(true)
     setError(null)
     
@@ -42,15 +47,23 @@ export function useJogos(bolaoId: string) {
       }
       
       const data = await response.json()
+      console.log('✅ Jogos carregados:', data.jogos?.length || 0)
       setJogos(data.jogos || [])
     } catch (error) {
-      console.error('Erro ao carregar jogos:', error)
+      console.error('❌ Erro ao carregar jogos:', error)
       setError('Erro ao carregar jogos')
       toast.error('Erro ao carregar jogos')
     } finally {
       setLoading(false)
     }
   }, [bolaoId])
+
+  // Carregar jogos automaticamente quando bolaoId mudar
+  useEffect(() => {
+    if (bolaoId) {
+      carregarJogos()
+    }
+  }, [bolaoId, carregarJogos])
 
   // Adicionar jogo
   const adicionarJogo = useCallback(async (novoJogo: NovoJogo) => {

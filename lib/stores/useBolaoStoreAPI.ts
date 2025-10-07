@@ -36,6 +36,7 @@ export interface Bolao {
   descricao: string
   codigo: string
   admin: string
+  campeonatoId?: string
   maxParticipantes: number
   participantes: Participante[]
   jogos: Jogo[]
@@ -44,6 +45,19 @@ export interface Bolao {
   criadoEm: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   premios?: any
+  premiacao?: {
+    porTurno: boolean
+    porGeral: boolean
+    turno1?: string | null
+    turno2?: string | null
+    geral1?: string | null
+    geral2?: string | null
+    geral3?: string | null
+  }
+  modalidade?: {
+    faseGrupos: boolean
+    mataMata: boolean
+  }
   configuracoesPontuacao?: {
     placarExato: number
     resultadoCerto: number

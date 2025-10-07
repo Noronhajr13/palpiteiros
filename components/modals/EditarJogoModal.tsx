@@ -8,6 +8,8 @@ import { X, Save } from 'lucide-react'
 
 interface Jogo {
   id: string
+  timeAId?: string
+  timeBId?: string
   timeA: string
   timeB: string
   data: string
@@ -18,8 +20,10 @@ interface Jogo {
 }
 
 interface DadosJogoAtualizado {
-  timeA: string
-  timeB: string
+  timeAId?: string
+  timeBId?: string
+  timeA?: string
+  timeB?: string
   data: string
   rodada: number
   status: 'agendado' | 'finalizado' | 'cancelado' | 'adiado'

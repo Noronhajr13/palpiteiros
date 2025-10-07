@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Trophy, Users, Target, TrendingUp, Medal } from "lucide-react"
-import { useAuthStore } from '@/lib/stores/useAuthStoreDB'
+import { useSession } from 'next-auth/react'
 import { useBolaoStoreDB as useBolaoStore } from '@/lib/stores/useBolaoStoreAPI'
 import { useRanking } from '@/lib/hooks/useRanking'
 
@@ -15,21 +16,51 @@ interface RankingPageProps {
 }
 
 export default function RankingPage({ params }: RankingPageProps) {
-  const { user, isAuthenticated } = useAuthStore()
-  const { bolaoAtual } = useBolaoStore()
+  const router = useRouter()
+  const { data: session, status } = useSession()
+  const { bolaoAtual, selecionarBolao } = useBolaoStore()
   const [bolaoId, setBolaoId] = useState<string>('')
 
   const { ranking, loading } = useRanking(bolaoId)
 
   useEffect(() => {
-    params.then(({ id }) => {
-      setBolaoId(id)
-    })
-  }, [params])
+    if (status === 'unauthenticated') {
+      router.push('/entrar')
+      return
+    }
 
-  if (!isAuthenticated) {
-    return null
+    if (status === 'authenticated') {
+      params.then(({ id }) => {
+        console.log('🏆 Carregando ranking para bolão:', id)
+        setBolaoId(id)
+        selecionarBolao(id)
+      })
+    }
+  }, [params, status, router, selecionarBolao])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    )
   }
+
+  if (!bolaoId) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Carregando informações do bolão...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const user = session?.user
+  if (!user) return null
 
   return (
     <div className="min-h-screen bg-background">
