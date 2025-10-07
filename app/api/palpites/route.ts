@@ -43,8 +43,11 @@ export async function POST(request: NextRequest) {
 
     // Verificar se já existe palpite (upsert)
     const palpiteExistente = await db.collection('palpites').findOne({
-      jogoId,
-      userId
+      userId,
+      $or: [
+        { jogoId },
+        { jogoId: ObjectId.isValid(jogoId) ? new ObjectId(jogoId) : jogoId }
+      ]
     })
 
     const palpiteData = {
@@ -101,10 +104,26 @@ export async function GET(request: NextRequest) {
   try {
     const db = await getDatabase()
 
+    console.log('🔍 GET Palpites - userId:', userId, 'bolaoId:', bolaoId, 'rodada:', rodada)
+
     // Construir match para filtrar por rodada se fornecido
     const matchStage: Record<string, unknown> = { 
       userId, 
       bolaoId 
+    }
+
+    // Primeiro, vamos ver quantos palpites existem
+    const palpitesCount = await db.collection('palpites').countDocuments(matchStage)
+    console.log('📊 Total de palpites encontrados:', palpitesCount)
+
+    if (palpitesCount > 0) {
+      const samplePalpite = await db.collection('palpites').findOne(matchStage)
+      console.log('📄 Exemplo de palpite:', {
+        jogoId: samplePalpite?.jogoId,
+        jogoIdType: typeof samplePalpite?.jogoId,
+        placarA: samplePalpite?.placarA,
+        placarB: samplePalpite?.placarB
+      })
     }
 
     // Buscar palpites com lookup para jogos
@@ -113,12 +132,23 @@ export async function GET(request: NextRequest) {
       {
         $lookup: {
           from: 'jogos',
-          localField: 'jogoId',
-          foreignField: '_id',
+          let: { jogoId: '$jogoId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $eq: ['$_id', { $toObjectId: '$$jogoId' }] },
+                    { $eq: [{ $toString: '$_id' }, '$$jogoId'] }
+                  ]
+                }
+              }
+            }
+          ],
           as: 'jogo'
         }
       },
-      { $unwind: '$jogo' }
+      { $unwind: { path: '$jogo', preserveNullAndEmptyArrays: false } }
     ]
 
     // Filtrar por rodada se fornecido
@@ -164,6 +194,15 @@ export async function GET(request: NextRequest) {
     )
 
     const palpites = await db.collection('palpites').aggregate(pipeline).toArray()
+
+    console.log('✅ Palpites retornados após lookup:', palpites.length)
+    if (palpites.length > 0) {
+      console.log('📄 Primeiro palpite:', {
+        id: palpites[0].id,
+        jogo: palpites[0].jogo ? `${palpites[0].jogo.timeA} vs ${palpites[0].jogo.timeB}` : 'SEM JOGO',
+        placar: `${palpites[0].placarA} x ${palpites[0].placarB}`
+      })
+    }
 
     return NextResponse.json(palpites)
   } catch (error) {
