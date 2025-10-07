@@ -183,6 +183,8 @@ export async function GET(request: NextRequest) {
             id: { $toString: '$jogo._id' },
             timeA: '$jogo.timeA',
             timeB: '$jogo.timeB',
+            timeAId: '$jogo.timeAId',
+            timeBId: '$jogo.timeBId',
             data: '$jogo.data',
             rodada: '$jogo.rodada',
             status: '$jogo.status',

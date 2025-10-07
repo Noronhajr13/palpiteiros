@@ -14,6 +14,13 @@ interface BolaoPageProps {
   params: Promise<{ id: string }>
 }
 
+interface Time {
+  id: string
+  nome: string
+  escudo: string | null
+  sigla: string
+}
+
 interface Palpite {
   id: string
   jogoId: string
@@ -25,6 +32,8 @@ interface Palpite {
     id: string
     timeA: string
     timeB: string
+    timeAId?: string
+    timeBId?: string
     data: Date
     rodada: number
     status: string
@@ -43,6 +52,32 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
   const totalRodadas = 38
   const [loadingPalpites, setLoadingPalpites] = useState(false)
   const [bolaoId, setBolaoId] = useState('')
+  const [times, setTimes] = useState<Record<string, Time>>({})
+
+  // Carregar times do campeonato
+  useEffect(() => {
+    const carregarTimes = async () => {
+      if (!bolaoAtual?.campeonatoId) return
+
+      try {
+        const response = await fetch(`/api/campeonatos/${bolaoAtual.campeonatoId}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.campeonato?.times) {
+            const timesMap: Record<string, Time> = {}
+            data.campeonato.times.forEach((time: Time) => {
+              timesMap[time.id] = time
+            })
+            setTimes(timesMap)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar times:', error)
+      }
+    }
+
+    carregarTimes()
+  }, [bolaoAtual])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -112,10 +147,19 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
     }
   }
 
+  // Função para verificar se acertou o palpite
+  const verificarAcerto = (palpite: Palpite): boolean => {
+    if (palpite.jogo.status !== 'finalizado') return false
+    if (palpite.jogo.placarA === null || palpite.jogo.placarB === null) return false
+    
+    // Acertou o placar exato
+    return palpite.placarA === palpite.jogo.placarA && palpite.placarB === palpite.jogo.placarB
+  }
+
   const calcularEstatisticas = () => {
     const total = palpites.length
     const realizados = palpites.filter(p => p.jogo.status === 'finalizado').length
-    const acertos = palpites.filter(p => p.acertou).length
+    const acertos = palpites.filter(p => verificarAcerto(p)).length
     const pendentes = palpites.filter(p => p.jogo.status !== 'finalizado').length
 
     return { total, realizados, acertos, pendentes }
@@ -128,7 +172,7 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
       return <Minus className="h-5 w-5 text-muted-foreground" />
     }
     
-    if (palpite.acertou) {
+    if (verificarAcerto(palpite)) {
       return <CheckCircle2 className="h-5 w-5 text-green-500" />
     }
     
@@ -140,11 +184,18 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
       return <Badge variant="outline" className="border-yellow-500/50 text-yellow-500">Pendente</Badge>
     }
     
-    if (palpite.acertou) {
+    if (verificarAcerto(palpite)) {
       return <Badge className="bg-green-500/10 text-green-500 border-green-500/50">Acertou</Badge>
     }
     
     return <Badge variant="destructive" className="bg-red-500/10 text-red-500 border-red-500/50">Errou</Badge>
+  }
+
+  const getEscudoTime = (timeId?: string, nomeTime?: string) => {
+    if (timeId && times[timeId]?.escudo) {
+      return times[timeId].escudo
+    }
+    return null
   }
 
   return (
@@ -278,7 +329,11 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
           </Card>
         ) : (
           <div className="space-y-4">
-            {palpites.map((palpite) => (
+            {palpites.map((palpite) => {
+              const escudoTimeA = getEscudoTime(palpite.jogo.timeAId, palpite.jogo.timeA)
+              const escudoTimeB = getEscudoTime(palpite.jogo.timeBId, palpite.jogo.timeB)
+              
+              return (
               <Card
                 key={palpite.id}
                 className="bg-card/80 backdrop-blur-sm border-border shadow-lg hover:shadow-xl transition-all"
@@ -286,16 +341,27 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between gap-4">
                     {/* Time A */}
-                    <div className="flex-1 text-right">
-                      <p className="font-bold text-lg mb-2">{palpite.jogo.timeA}</p>
-                      <div className="flex items-center justify-end gap-2">
+                    <div className="flex-1 flex flex-col items-end gap-3">
+                      <div className="flex items-center gap-3">
+                        <p className="font-bold text-lg">{palpite.jogo.timeA}</p>
+                        {escudoTimeA && (
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+                            <img 
+                              src={escudoTimeA} 
+                              alt={palpite.jogo.timeA}
+                              className="w-10 h-10 object-contain"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">Seu palpite:</span>
                         <Badge variant="outline" className="text-lg font-bold">
                           {palpite.placarA}
                         </Badge>
                       </div>
                       {palpite.jogo.status === 'finalizado' && (
-                        <div className="flex items-center justify-end gap-2 mt-2">
+                        <div className="flex items-center gap-2">
                           <span className="text-sm text-muted-foreground">Resultado:</span>
                           <Badge className="text-lg font-bold bg-primary/10 text-primary">
                             {palpite.jogo.placarA}
@@ -318,8 +384,19 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
                     </div>
 
                     {/* Time B */}
-                    <div className="flex-1 text-left">
-                      <p className="font-bold text-lg mb-2">{palpite.jogo.timeB}</p>
+                    <div className="flex-1 flex flex-col items-start gap-3">
+                      <div className="flex items-center gap-3">
+                        {escudoTimeB && (
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+                            <img 
+                              src={escudoTimeB} 
+                              alt={palpite.jogo.timeB}
+                              className="w-10 h-10 object-contain"
+                            />
+                          </div>
+                        )}
+                        <p className="font-bold text-lg">{palpite.jogo.timeB}</p>
+                      </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-lg font-bold">
                           {palpite.placarB}
@@ -327,7 +404,7 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
                         <span className="text-sm text-muted-foreground">Seu palpite</span>
                       </div>
                       {palpite.jogo.status === 'finalizado' && (
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2">
                           <Badge className="text-lg font-bold bg-primary/10 text-primary">
                             {palpite.jogo.placarB}
                           </Badge>
@@ -361,7 +438,7 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </div>
         )}
       </main>
