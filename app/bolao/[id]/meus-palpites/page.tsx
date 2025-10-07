@@ -6,9 +6,10 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Target, CheckCircle2, XCircle, Minus, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowLeft, Target, CheckCircle2, XCircle, Minus, ChevronLeft, ChevronRight, Trophy, TrendingUp, Activity } from "lucide-react"
 import { useSession } from 'next-auth/react'
 import { useBolaoStoreDB as useBolaoStore } from '@/lib/stores/useBolaoStoreAPI'
+import Image from 'next/image'
 
 interface BolaoPageProps {
   params: Promise<{ id: string }>
@@ -169,26 +170,41 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
 
   const getResultadoIcon = (palpite: Palpite) => {
     if (palpite.jogo.status !== 'finalizado') {
-      return <Minus className="h-5 w-5 text-muted-foreground" />
+      return <Minus className="h-6 w-6 text-muted-foreground" />
     }
     
     if (verificarAcerto(palpite)) {
-      return <CheckCircle2 className="h-5 w-5 text-green-500" />
+      return <CheckCircle2 className="h-6 w-6 text-green-500" />
     }
     
-    return <XCircle className="h-5 w-5 text-red-500" />
+    return <XCircle className="h-6 w-6 text-red-500" />
   }
 
   const getResultadoBadge = (palpite: Palpite) => {
     if (palpite.jogo.status !== 'finalizado') {
-      return <Badge variant="outline" className="border-yellow-500/50 text-yellow-500">Pendente</Badge>
+      return (
+        <Badge variant="outline" className="border-yellow-500/50 text-yellow-500 font-semibold">
+          <Activity className="h-3 w-3 mr-1" />
+          Aguardando
+        </Badge>
+      )
     }
     
     if (verificarAcerto(palpite)) {
-      return <Badge className="bg-green-500/10 text-green-500 border-green-500/50">Acertou</Badge>
+      return (
+        <Badge className="bg-green-500/20 text-green-500 border-green-500/50 font-semibold">
+          <CheckCircle2 className="h-3 w-3 mr-1" />
+          Acertou
+        </Badge>
+      )
     }
     
-    return <Badge variant="destructive" className="bg-red-500/10 text-red-500 border-red-500/50">Errou</Badge>
+    return (
+      <Badge variant="destructive" className="bg-red-500/20 text-red-500 border-red-500/50 font-semibold">
+        <XCircle className="h-3 w-3 mr-1" />
+        Errou
+      </Badge>
+    )
   }
 
   const getEscudoTime = (timeId?: string, nomeTime?: string) => {
@@ -196,6 +212,14 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
       return times[timeId].escudo
     }
     return null
+  }
+
+  const getSiglaTime = (timeId?: string, nomeTime?: string) => {
+    if (timeId && times[timeId]?.sigla) {
+      return times[timeId].sigla
+    }
+    // Pegar primeiras 3 letras do nome como fallback
+    return nomeTime?.substring(0, 3).toUpperCase() || '???'
   }
 
   return (
@@ -228,41 +252,57 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Estatísticas Gerais */}
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Estatísticas Gerais - Design Moderno */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
-            <CardContent className="pt-6">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border-blue-500/20 hover:border-blue-500/40 transition-all">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-bl-full"></div>
+            <CardContent className="pt-6 relative z-10">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Total</p>
-                <p className="text-3xl font-bold text-foreground">{stats.total}</p>
+                <Target className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                <p className="text-xs text-muted-foreground mb-1 font-medium">Total Palpites</p>
+                <p className="text-4xl font-black bg-gradient-to-br from-blue-500 to-blue-600 bg-clip-text text-transparent">
+                  {stats.total}
+                </p>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
-            <CardContent className="pt-6">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-green-500/10 via-green-500/5 to-transparent border-green-500/20 hover:border-green-500/40 transition-all">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-bl-full"></div>
+            <CardContent className="pt-6 relative z-10">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Acertos</p>
-                <p className="text-3xl font-bold text-green-500">{stats.acertos}</p>
+                <CheckCircle2 className="h-6 w-6 mx-auto mb-2 text-green-500" />
+                <p className="text-xs text-muted-foreground mb-1 font-medium">Acertos</p>
+                <p className="text-4xl font-black bg-gradient-to-br from-green-500 to-green-600 bg-clip-text text-transparent">
+                  {stats.acertos}
+                </p>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
-            <CardContent className="pt-6">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent border-purple-500/20 hover:border-purple-500/40 transition-all">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-bl-full"></div>
+            <CardContent className="pt-6 relative z-10">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Realizados</p>
-                <p className="text-3xl font-bold text-purple-500">{stats.realizados}</p>
+                <Trophy className="h-6 w-6 mx-auto mb-2 text-purple-500" />
+                <p className="text-xs text-muted-foreground mb-1 font-medium">Finalizados</p>
+                <p className="text-4xl font-black bg-gradient-to-br from-purple-500 to-purple-600 bg-clip-text text-transparent">
+                  {stats.realizados}
+                </p>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border-yellow-500/20">
-            <CardContent className="pt-6">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-500/10 via-yellow-500/5 to-transparent border-yellow-500/20 hover:border-yellow-500/40 transition-all">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-500/10 rounded-bl-full"></div>
+            <CardContent className="pt-6 relative z-10">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Pendentes</p>
-                <p className="text-3xl font-bold text-yellow-500">{stats.pendentes}</p>
+                <Activity className="h-6 w-6 mx-auto mb-2 text-yellow-500" />
+                <p className="text-xs text-muted-foreground mb-1 font-medium">Aguardando</p>
+                <p className="text-4xl font-black bg-gradient-to-br from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+                  {stats.pendentes}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -332,109 +372,196 @@ export default function MeusPalpitesPage({ params }: BolaoPageProps) {
             {palpites.map((palpite) => {
               const escudoTimeA = getEscudoTime(palpite.jogo.timeAId, palpite.jogo.timeA)
               const escudoTimeB = getEscudoTime(palpite.jogo.timeBId, palpite.jogo.timeB)
+              const siglaTimeA = getSiglaTime(palpite.jogo.timeAId, palpite.jogo.timeA)
+              const siglaTimeB = getSiglaTime(palpite.jogo.timeBId, palpite.jogo.timeB)
+              const acertou = verificarAcerto(palpite)
+              const finalizado = palpite.jogo.status === 'finalizado'
               
               return (
               <Card
                 key={palpite.id}
-                className="bg-card/80 backdrop-blur-sm border-border shadow-lg hover:shadow-xl transition-all"
+                className={`group relative overflow-hidden transition-all duration-300 ${
+                  finalizado 
+                    ? acertou 
+                      ? 'bg-gradient-to-br from-green-500/5 to-green-600/10 border-green-500/30 hover:border-green-500/50' 
+                      : 'bg-gradient-to-br from-red-500/5 to-red-600/10 border-red-500/30 hover:border-red-500/50'
+                    : 'bg-card/80 backdrop-blur-sm border-border hover:border-primary/30'
+                } shadow-lg hover:shadow-xl`}
               >
+                {/* Badge de Status no Canto */}
+                <div className="absolute top-3 right-3 z-10">
+                  {getResultadoBadge(palpite)}
+                </div>
+
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between gap-4">
-                    {/* Time A */}
-                    <div className="flex-1 flex flex-col items-end gap-3">
-                      <div className="flex items-center gap-3">
-                        <p className="font-bold text-lg">{palpite.jogo.timeA}</p>
-                        {escudoTimeA && (
-                          <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex items-center justify-center">
-                            <img 
-                              src={escudoTimeA} 
+                  {/* Container Principal - Layout Horizontal Moderno */}
+                  <div className="grid grid-cols-[1fr_auto_1fr] gap-6 items-center">
+                    
+                    {/* TIME A - Lado Esquerdo */}
+                    <div className="flex flex-col items-center gap-3">
+                      {/* Escudo ou Sigla */}
+                      <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center overflow-hidden border-2 border-border group-hover:border-primary/30 transition-colors">
+                        {escudoTimeA ? (
+                          <div className="relative w-16 h-16">
+                            <Image
+                              src={escudoTimeA}
                               alt={palpite.jogo.timeA}
-                              className="w-10 h-10 object-contain"
+                              fill
+                              className="object-contain p-1"
+                              unoptimized
                             />
+                          </div>
+                        ) : (
+                          <span className="text-2xl font-black text-muted-foreground/50">
+                            {siglaTimeA}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Nome do Time */}
+                      <p className="font-bold text-base text-center line-clamp-2 min-h-[2.5rem]">
+                        {palpite.jogo.timeA}
+                      </p>
+                      
+                      {/* Placares */}
+                      <div className="w-full space-y-2">
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-xs text-muted-foreground font-medium">Palpite</span>
+                          <Badge 
+                            variant="outline" 
+                            className="text-2xl font-black px-4 py-2 min-w-[60px] justify-center bg-background"
+                          >
+                            {palpite.placarA}
+                          </Badge>
+                        </div>
+                        
+                        {finalizado && (
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-xs text-muted-foreground font-medium">Real</span>
+                            <Badge 
+                              className={`text-2xl font-black px-4 py-2 min-w-[60px] justify-center ${
+                                palpite.placarA === palpite.jogo.placarA
+                                  ? 'bg-green-500/20 text-green-500 border-green-500/50'
+                                  : 'bg-red-500/20 text-red-500 border-red-500/50'
+                              }`}
+                            >
+                              {palpite.jogo.placarA}
+                            </Badge>
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Seu palpite:</span>
-                        <Badge variant="outline" className="text-lg font-bold">
-                          {palpite.placarA}
-                        </Badge>
-                      </div>
-                      {palpite.jogo.status === 'finalizado' && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Resultado:</span>
-                          <Badge className="text-lg font-bold bg-primary/10 text-primary">
-                            {palpite.jogo.placarA}
-                          </Badge>
-                        </div>
-                      )}
                     </div>
 
-                    {/* VS e Ícone */}
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="p-3 rounded-full bg-accent/20">
+                    {/* DIVISOR CENTRAL - VS e Ícone */}
+                    <div className="flex flex-col items-center gap-3 px-4">
+                      {/* Ícone de Resultado */}
+                      <div className={`p-4 rounded-2xl transition-all ${
+                        finalizado
+                          ? acertou
+                            ? 'bg-green-500/20 ring-2 ring-green-500/30'
+                            : 'bg-red-500/20 ring-2 ring-red-500/30'
+                          : 'bg-muted/50'
+                      }`}>
                         {getResultadoIcon(palpite)}
                       </div>
-                      <span className="text-xs font-bold text-muted-foreground">VS</span>
-                      {palpite.pontos !== undefined && palpite.pontos > 0 && (
-                        <Badge className="gradient-primary text-white">
-                          +{palpite.pontos} pts
-                        </Badge>
-                      )}
+                      
+                      {/* VS */}
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-sm font-black text-muted-foreground/50">VS</span>
+                        {palpite.pontos !== undefined && palpite.pontos > 0 && (
+                          <Badge className="gradient-primary text-white font-bold px-3 py-1">
+                            <Trophy className="h-3 w-3 mr-1" />
+                            {palpite.pontos}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Linha Vertical Decorativa */}
+                      <div className="h-16 w-0.5 bg-gradient-to-b from-transparent via-border to-transparent"></div>
                     </div>
 
-                    {/* Time B */}
-                    <div className="flex-1 flex flex-col items-start gap-3">
-                      <div className="flex items-center gap-3">
-                        {escudoTimeB && (
-                          <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex items-center justify-center">
-                            <img 
-                              src={escudoTimeB} 
+                    {/* TIME B - Lado Direito */}
+                    <div className="flex flex-col items-center gap-3">
+                      {/* Escudo ou Sigla */}
+                      <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center overflow-hidden border-2 border-border group-hover:border-primary/30 transition-colors">
+                        {escudoTimeB ? (
+                          <div className="relative w-16 h-16">
+                            <Image
+                              src={escudoTimeB}
                               alt={palpite.jogo.timeB}
-                              className="w-10 h-10 object-contain"
+                              fill
+                              className="object-contain p-1"
+                              unoptimized
                             />
                           </div>
+                        ) : (
+                          <span className="text-2xl font-black text-muted-foreground/50">
+                            {siglaTimeB}
+                          </span>
                         )}
-                        <p className="font-bold text-lg">{palpite.jogo.timeB}</p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-lg font-bold">
-                          {palpite.placarB}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">Seu palpite</span>
-                      </div>
-                      {palpite.jogo.status === 'finalizado' && (
-                        <div className="flex items-center gap-2">
-                          <Badge className="text-lg font-bold bg-primary/10 text-primary">
-                            {palpite.jogo.placarB}
+                      
+                      {/* Nome do Time */}
+                      <p className="font-bold text-base text-center line-clamp-2 min-h-[2.5rem]">
+                        {palpite.jogo.timeB}
+                      </p>
+                      
+                      {/* Placares */}
+                      <div className="w-full space-y-2">
+                        <div className="flex items-center justify-center gap-2">
+                          <Badge 
+                            variant="outline" 
+                            className="text-2xl font-black px-4 py-2 min-w-[60px] justify-center bg-background"
+                          >
+                            {palpite.placarB}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">Resultado</span>
+                          <span className="text-xs text-muted-foreground font-medium">Palpite</span>
                         </div>
-                      )}
-                    </div>
-
-                    {/* Status */}
-                    <div className="hidden md:block">
-                      {getResultadoBadge(palpite)}
+                        
+                        {finalizado && (
+                          <div className="flex items-center justify-center gap-2">
+                            <Badge 
+                              className={`text-2xl font-black px-4 py-2 min-w-[60px] justify-center ${
+                                palpite.placarB === palpite.jogo.placarB
+                                  ? 'bg-green-500/20 text-green-500 border-green-500/50'
+                                  : 'bg-red-500/20 text-red-500 border-red-500/50'
+                              }`}
+                            >
+                              {palpite.jogo.placarB}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground font-medium">Real</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Status Mobile */}
-                  <div className="md:hidden mt-4 flex justify-center">
-                    {getResultadoBadge(palpite)}
-                  </div>
+                  {/* Rodapé - Data e Informações */}
+                  <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Activity className="h-4 w-4" />
+                      <span className="font-medium">
+                        {new Date(palpite.jogo.data).toLocaleDateString('pt-BR', {
+                          weekday: 'short',
+                          day: '2-digit',
+                          month: 'short',
+                        })}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        {new Date(palpite.jogo.data).toLocaleTimeString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
 
-                  {/* Data do Jogo */}
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <p className="text-sm text-muted-foreground text-center">
-                      {new Date(palpite.jogo.data).toLocaleDateString('pt-BR', {
-                        weekday: 'long',
-                        day: '2-digit',
-                        month: 'long',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
+                    {acertou && finalizado && (
+                      <div className="flex items-center gap-2 text-green-500 font-semibold text-sm">
+                        <TrendingUp className="h-4 w-4" />
+                        <span>Placar Exato!</span>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
